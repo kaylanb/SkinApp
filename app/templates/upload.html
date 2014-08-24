@@ -1,0 +1,30 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Hi, User</h1>
+<form action="" method="post" name="upload">
+    {{form.hidden_tag()}}
+    <p>
+        Enter name of RGB image<br>
+        {{form.image_name(size=80)}}
+        {% for error in form.errors.image_name %}
+        <span style="color: red;">[{{error}}]</span>
+        {% endfor %}<br></p>
+    <p>Select rgb image to upload<br>
+        {{form.rgb_image}}
+    </p>
+    <!-- 
+</p>
+    What do you see in image?<br>
+    {% for subfield in form.WhatSee %}
+    <tr>
+        <td>{{ subfield }}</td>
+        <td>{{ subfield.label }}</td>
+    </tr>
+    {% endfor %}
+ -->
+    </p>{{form.submit}}</p>
+<!--     <p><input type="submit" value="upload"></p> -->
+</form>
+{% endblock %}
