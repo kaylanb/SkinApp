@@ -1,13 +1,15 @@
+'''when this module is called, do ML and output 3 colm text file containing: prediction, answer, url'''
+
 from numpy.random import rand
 from numpy import ones, zeros, concatenate
 import numpy as np
 from pandas import read_csv, DataFrame, concat
 
-from sklearn.cross_validation import cross_val_score
-from sklearn.ensemble import RandomForestClassifier
+# from sklearn.cross_validation import cross_val_score
+# from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
+# from sklearn.ensemble import AdaBoostClassifier
+# from sklearn.tree import DecisionTreeClassifier
 
 class FacesAndLimbsTrainingSet():
     def __init__(self,Food_df,Faces_df,SkinNoFaces_df):
@@ -111,11 +113,11 @@ def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_sp
         TrainX = preprocessing.scale(TrainX)
         TestX = preprocessing.scale(TestX)
     
-    forest1 = RandomForestClassifier(n_estimators=n_estim, max_depth=None,
-                                     min_samples_split=min_samples_spl, random_state=0,
-                                    compute_importances=True)
-    forest1.fit(TrainX,TrainY)
-    forestOut1 = forest1.predict(TestX)
+    # forest1 = RandomForestClassifier(n_estimators=n_estim, max_depth=None,
+#                                      min_samples_split=min_samples_spl, random_state=0,
+#                                     compute_importances=True)
+#     forest1.fit(TrainX,TrainY)
+#     forestOut1 = forest1.predict(TestX)
 #     precision(forestOut1,TestY)
 #     recall(forestOut1,TestY)
 #     print sum(forestOut1 == TestY)/float(len(forestOut1))
@@ -129,9 +131,9 @@ def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_sp
 #     recall(forestOut2,TestY)
 #     print sum(forestOut2 == TestY)/float(len(forestOut2))
 
-    forest3 = AdaBoostClassifier(n_estimators=n_estim, random_state=0)
-    forest3.fit(TrainX,TrainY)
-    forestOut3 = forest3.predict(TestX) 
+   #  forest3 = AdaBoostClassifier(n_estimators=n_estim, random_state=0)
+#     forest3.fit(TrainX,TrainY)
+#     forestOut3 = forest3.predict(TestX) 
 #     precision(forestOut3,TestY)
 #     recall(forestOut3,TestY)
 #     print sum(forestOut3 == TestY)/float(len(forestOut3))
@@ -154,35 +156,38 @@ def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_sp
 #     return forestOut2,TestY,TestX,cTestP,cTestF,People_all,Food_all
     return forest2,forestOut2,TestY,TestX_URL
 
+def run():
+    Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
+    Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
+    SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
+    Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
+    Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
+    SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
 
-Food_KayF = read_csv('NewTraining_Food_everyones_KFeat_Toddmap.csv')
-Faces_KayF = read_csv('NewTraining_Faces_everyones_KFeat_Toddmap.csv')
-SkinNoFaces_KayF = read_csv('NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
-Food_TeamF = read_csv('NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
-Faces_TeamF = read_csv('NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
-SkinNoFaces_TeamF = read_csv('NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
+    #team feature numbers for different definitions of Food,People
+    team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+    #kay feature numbers for different definitions of Food,People
+    kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
+    #kay feature numbers + team feature number for skin maps for different definitions of Food,People
+    extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
+                        Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+    kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
 
-#team feature numbers for different definitions of Food,People
-team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-#kay feature numbers for different definitions of Food,People
-kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
-#kay feature numbers + team feature number for skin maps for different definitions of Food,People
-extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
-                    Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
+    #run ML on Food vs. People train/test set of choice
+    (f2,fout2,TestY,TestX_URL)= best_machine_learn_NoRandOrd(kay_extend.NoLims.Food,kay_extend.NoLims.People, 
+                                         n_estim=100,min_samples_spl=2,scale=False)
+    (prec,tp_norm,fp_norm)= precision(fout2,TestY)
+    (rec,tp_norm,fn_norm)=  recall(fout2,TestY)
+    print np.where(fout2.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
 
-#run ML on Food vs. People train/test set of choice
-(f2,fout2,TestY,TestX_URL)= best_machine_learn_NoRandOrd(kay_extend.NoLims.Food,kay_extend.NoLims.People, 
-                                     n_estim=100,min_samples_spl=2,scale=False)
-(prec,tp_norm,fp_norm)= precision(fout2,TestY)
-(rec,tp_norm,fn_norm)=  recall(fout2,TestY)
-print np.where(fout2.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
+    # 
+    # url= TestX_URL[50]
+    # ind=np.where(TestX_URL == url)[0]
+    # if ind.size != 1: print "bad"
+    # else: 
+    #     print "good"
+    #     ind=ind[0]
 
-# 
-# url= TestX_URL[50]
-# ind=np.where(TestX_URL == url)[0]
-# if ind.size != 1: print "bad"
-# else: 
-#     print "good"
-#     ind=ind[0]
+    return TestY,fout2,TestX_URL
+
 

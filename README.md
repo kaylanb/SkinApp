@@ -1,5 +1,6 @@
 Must Do steps for app:
 1. 1st Functionality of Web App: user is shown image from Test Set (can hit button to go to another image if desired), says whether has People or Food in it, hits submit, learned RandForest predictsfor ALL Test set images, outputs what it thinks was in the specific image user saw AND precision,recall for entire Test set it ran on
+    -- problems installing scipy, so will just put Test Set 3 colum output in tmp/ so no 1st butt for now
 	-- for user interface have 4 buttons, 1st butt: runs ML on Test set and outputs 3 colm text file: prediction, answer, url, 2nd butt: checks whether that file exists and if so reads it in and outputs results, 3rd butt: calls function that calcs all Blob features and plots them on one subplot saves subplot and subplot is shown to user, 4th butt: same as 3rd but for HOG
 2. 2nd Functionality: same as 1st Functionality, but user uploads their own rgb image from local machine and same info entered and returned
 3. get working on heroku

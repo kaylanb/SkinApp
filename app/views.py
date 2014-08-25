@@ -5,8 +5,9 @@ from app import app
 from flask.ext.wtf import Form
 from wtforms import TextField, SubmitField, TextAreaField
 from wtforms.validators import Required, Optional
-#Algorithm table, ML results
-import ML_results
+#other
+from pandas import read_csv, DataFrame
+
 
 class Click2Play(Form):
     type=TextField('Anything', validators = [Required()])
@@ -16,7 +17,21 @@ class getWhatUserSees(Form):
     UserSees = TextField('UserSees', validators = [Required()])
     test= TextAreaField("test",validators= [Optional()])
     MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
-    
+   
+def do_ML():
+    import  machine_learn as ml
+    (ans,predict,url) = ml.run()
+    try: 
+        f=open("tmp/ml_results.csv","r")
+        flash("results.csv already exists")
+    except IOError:
+        #if get here, file does not exist
+        df= DataFrame()
+        df["ans"]=ans
+        df["predict"]=predict
+        df["url"]=url
+        df.to_csv("tmp/ml_results.csv",index=True)
+        flash("output results.csv")
 
 @app.route('/')
 @app.route('/index', methods = ['GET', 'POST'])
@@ -41,6 +56,11 @@ def AnalyzeImg():
         return redirect('/ML')#,img_url=urls[0])
     return render_template('AnalyzeImg.html',
         title = 'AnalyzeImg',urls=urls,form=form)
+
+@app.route('/OutputResults', methods = ['GET', 'POST'])
+def OutputResults():
+    do_ML()
+
 
 @app.route('/ML', methods = ['GET', 'POST'])#img_url=image_url)
 def ML():
