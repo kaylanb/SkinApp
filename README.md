@@ -8,3 +8,9 @@ Must Do steps for app:
 5. Add "about" html sections for the project, the Blob and HOG methods, intended use, needed/future work, acknowledgements
 6. allow for random ordering when constructing TrainX,TestX,TrainY,TestY
     -- for now (8/24/14), for simplicity, I am NOT RANDOM ORDERING TrainX and TestX data sets, instead TrainX is the first half of the Food rows (features) concatenated with the first half of People rows (features), TestX is the same but using second half of rows, and TextY and TrainY are all 0's for Food and all 1's for People concatenated in same way
+
+Upload File code modified from: http://www.runnable.com/
+setup(name='Uploading', version='1.0',
+      description='Code example demonstrating how to upload a file using Flask',
+      author='Miguel Molina', author_email='info@runnable.com',
+      url='http://www.runnable.com/')
