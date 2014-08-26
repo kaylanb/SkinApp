@@ -156,38 +156,48 @@ def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_sp
 #     return forestOut2,TestY,TestX,cTestP,cTestF,People_all,Food_all
     return forest2,forestOut2,TestY,TestX_URL
 
-def run():
-    Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
-    Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
-    SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
-    Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
-    Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
-    SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
+# def run():
+Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
+Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
+SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
+Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
+Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
+SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
 
-    #team feature numbers for different definitions of Food,People
-    team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-    #kay feature numbers for different definitions of Food,People
-    kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
-    #kay feature numbers + team feature number for skin maps for different definitions of Food,People
-    extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
-                        Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-    kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
+#team feature numbers for different definitions of Food,People
+team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+#kay feature numbers for different definitions of Food,People
+kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
+#kay feature numbers + team feature number for skin maps for different definitions of Food,People
+extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
+                    Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
 
-    #run ML on Food vs. People train/test set of choice
-    (f2,fout2,TestY,TestX_URL)= best_machine_learn_NoRandOrd(kay_extend.NoLims.Food,kay_extend.NoLims.People, 
-                                         n_estim=100,min_samples_spl=2,scale=False)
-    (prec,tp_norm,fp_norm)= precision(fout2,TestY)
-    (rec,tp_norm,fn_norm)=  recall(fout2,TestY)
-    print np.where(fout2.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
+#run ML on Food vs. People train/test set of choice
+(f2,fout2,TestY,TestX_URL)= best_machine_learn_NoRandOrd(kay_extend.NoLims.Food,kay_extend.NoLims.People, 
+                                     n_estim=100,min_samples_spl=2,scale=False)
+(prec,tp_norm,fp_norm)= precision(fout2,TestY)
+(rec,tp_norm,fn_norm)=  recall(fout2,TestY)
+print np.where(fout2.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
 
-    # 
-    # url= TestX_URL[50]
-    # ind=np.where(TestX_URL == url)[0]
-    # if ind.size != 1: print "bad"
-    # else: 
-    #     print "good"
-    #     ind=ind[0]
+# 
+# url= TestX_URL[50]
+# ind=np.where(TestX_URL == url)[0]
+# if ind.size != 1: print "bad"
+# else: 
+#     print "good"
+#     ind=ind[0]
 
-    return TestY,fout2,TestX_URL
+try: 
+    f=open("tmp/ml_results.csv","r")
+    print "results.csv already exists"
+except IOError:
+    #if get here, file does not exist
+    df= DataFrame()
+    df["ans"]=TestY
+    df["predict"]=fout2
+    df["url"]=TestX_URL
+    df.to_csv("tmp/ml_results.csv",index=True)
+    print "output results.csv"
 
 
