@@ -1,0 +1,23 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 
+<h1>Analyzing this image</h1>
+<img src={{image_url}} width="40" height="40">
+ -->
+
+<h1>Blob Method results are:</h1>
+<figure>
+    <img src={{blob_image_results}} width="200" height="800">
+    <figcaption>Results for Blob Method</figcaption>
+</figure>
+<p><em>{{blob_text_results}}</em></p>
+
+<h1>HOG Method results are:</h1>
+<figure>
+    <img src={{hog_image_results}} width="200" height="800">
+    <figcaption>Results for Hog Method</figcaption>
+</figure>
+<p><em>{{hog_text_results}}</em></p>
+{% endblock %}

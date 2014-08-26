@@ -1,0 +1,32 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Hi, User</h1>
+<h2>Here is the first url:</h2>
+<p>{{urls[0]}}</p>
+<h2>Here is its image</h2>
+<!-- <img src={{urls[0]}} width="200" height="200" alt="first url image"> -->
+<figure>
+    <img src={{urls[0]}} width="200" height="200">
+    <figcaption>Image of first url</figcaption>
+</figure>
+
+<form action="" method="post" name="index">
+    {{form.hidden_tag()}}
+    <p>From the three categories: Food, Faces, SkinOnly, type which ones you see in image<br>
+    {{form.UserSees(size=80)}}
+    {% for error in form.errors.UserSeesInImage %}
+    <span style="color: red;">[{{error}}]</span>
+    {% endfor %}<br>
+    </p>
+       <!-- 
+ |{% for pr in providers %}
+        <a href="javascript:set_dopenid('{{pr.url}}', '{{pr.name}}');">{{pr.name}}</a> |
+        {% endfor %}<br>
+ -->
+    </p>Hit submit to have our Blob and HOG methods analyze the image<br>
+    {{form.MlOnImage}}</p>
+</form>
+
+{% endblock %}
