@@ -106,20 +106,15 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-# This route will show a form to perform an AJAX request
-# jQuery is loaded to execute the request and update the
-# value of the operation
+#webpage with form for user upload local file
 @app.route('/upload')
-def upload_start_pt():
+def upload():
     return render_template('upload.html')
 
 
-class TestRedirectForm(Form):
-    remember_me = BooleanField('remember_me', default = False)
-
 # Route that will process the file upload
-@app.route('/upload/savefile', methods=['GET','POST'])
-def upload():
+@app.route('/upload_process', methods=['POST'])
+def upload_process():
     # Get the name of the uploaded file
     file = request.files['file']
     # Check if the file is one of the allowed types/extensions
@@ -132,35 +127,26 @@ def upload():
         file.save(saved_at)
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-#         return redirect(url_for('uploaded_file',
-#                                 filename=filename))
-        return redirect(url_for('func_call_analyze'))
-        # image_url=url_for('uploaded_file',filename=filename)
-#         form =TestRedirectForm()
-#         if request.method == 'POST':
-#             return redirect('/analyze')#,image_url=image_url,saved_at=saved_at))
-#         return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
-        
+#         args={}
+#         args["filename"]=filename
+#         args["saved_at"]=saved_at
+        return redirect( url_for('upload_analyze',filename=filename))#,saved_at) )
 
-# This route is expecting a parameter containing the name
-# of a file. Then it will locate that file on the upload
-# directory and show it on the browser, so if the user uploads
-# an image, that image is going to be show after the upload
-# @app.route('/uploads/<filename>')
-@app.route('/uploads/<filename>')
-def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
-                               filename)
+#if call "url_for('get_image_url',arg1=arg1,...,argN=argN)", must have "@app.route('/get_image_url/<argN>') decorator for each argument argN
+@app.route('/get_image_url')
+@app.route('/get_image_url/<filename>')
+def get_image_url(filename):
+    '''for use in <somefile>.html, so can call <img src={{ url_for('upload_send_image_url',filename=filename }}>'''
+    return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
+#     return send_from_directory(app.config['UPLOAD_FOLDER'],
+#                                "engage_1ps.jpg")
 
-@app.route('/analyze', methods = ['GET', 'POST'])
-def func_call_analyze():#image_url,saved_at):
-    return "successfully redirected to /analyze!"
-    # form = UploadAnalyze()
-#     if form.validate_on_submit():
-#         flash('User uploaded their own image and chose to analyze with: ' + "IAMHERE")#form.HowAnalyze.data )
-#         return redirect('/')
-#     return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
-    
+#webpage showing uploaded image and form to select options for analyzing image
+@app.route('/upload/analyze/')
+@app.route('/upload/analyze/<filename>')
+def upload_analyze(filename):
+    return render_template('upload.html',filename=filename)
+  
 #######################
     
 if __name__ == '__main__':
