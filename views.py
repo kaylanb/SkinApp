@@ -134,11 +134,12 @@ def upload():
         # will basicaly show on the browser the uploaded file
 #         return redirect(url_for('uploaded_file',
 #                                 filename=filename))
-        image_url=url_for('uploaded_file',filename=filename)
-        form =TestRedirectForm()
-        if request.method == 'POST':
-            return redirect('/analyze')#,image_url=image_url,saved_at=saved_at))
-        return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
+        return redirect(url_for('func_call_analyze'))
+        # image_url=url_for('uploaded_file',filename=filename)
+#         form =TestRedirectForm()
+#         if request.method == 'POST':
+#             return redirect('/analyze')#,image_url=image_url,saved_at=saved_at))
+#         return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
         
 
 # This route is expecting a parameter containing the name
