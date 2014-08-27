@@ -3,7 +3,7 @@ from flask import render_template, flash, redirect
 import numpy as np
 #forms
 from flask.ext.wtf import Form
-from wtforms import TextField, SubmitField, TextAreaField
+from wtforms import TextField, SubmitField, TextAreaField, BooleanField, SelectField,SelectMultipleField
 from wtforms.validators import Required, Optional
 #other
 from pandas import read_csv, DataFrame
@@ -26,6 +26,16 @@ class getWhatUserSees(Form):
     test= TextAreaField("test",validators= [Optional()])
     MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
    
+class SelectOption(Form):
+    choices= [("1","Use Test Image"),('2','Upload my own image')]
+    HowAnalyze= SelectField("HowAnalyze",choices=choices)
+    choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
+    WhichMethods= SelectMultipleField("Which Methods",choices=choices)
+
+class UploadAnalyze(Form):
+    choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
+    HowAnalyze= SelectField("HowAnalyze",choices=choices)
+
 # def do_ML():
 #     import  machine_learn as ml
 #     (ans,predict,url) = ml.run()
@@ -41,15 +51,15 @@ class getWhatUserSees(Form):
 #         df.to_csv("tmp/ml_results.csv",index=True)
 #         flash("output results.csv")
 
-@app.route('/')
-@app.route('/index', methods = ['GET', 'POST'])
+@app.route('/', methods=['GET','POST'])
+# @app.route('/index', methods = ['GET', 'POST'])
 def index():
-    form= Click2Play()
+#     form= Click2Play()
+    form= SelectOption()
     if form.validate_on_submit():
-        return "I AM HERE"
-#         flash("HERE")
-#         return redirect(url_for('AnalyzeImg'))
-    else: return render_template('index.html',title = 'Skin vs. Food',form=form)
+        flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
+        return redirect('/AnalyzeImg')
+    return render_template('index.html',title = 'Select Option',form=form)
 
 @app.route('/AnalyzeImg', methods = ['GET', 'POST'])
 def AnalyzeImg():
@@ -99,13 +109,13 @@ def allowed_file(filename):
 # This route will show a form to perform an AJAX request
 # jQuery is loaded to execute the request and update the
 # value of the operation
-@app.route('/upload_start_pt')
+@app.route('/upload')
 def upload_start_pt():
     return render_template('upload.html')
 
 
 # Route that will process the file upload
-@app.route('/upload', methods=['POST'])
+@app.route('/upload/savefile', methods=['GET','POST'])
 def upload():
     # Get the name of the uploaded file
     file = request.files['file']
@@ -115,20 +125,33 @@ def upload():
         filename = secure_filename(file.filename)
         # Move the file form the temporal folder to
         # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        saved_at=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(saved_at)
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        return redirect(url_for('uploaded_file',
-                                filename=filename))
+#         return redirect(url_for('uploaded_file',
+#                                 filename=filename))
+        image_url=url_for('uploaded_file',filename=filename)
+        return redirect(url_for('func_call_analyze'))#,image_url=image_url,saved_at=saved_at))
 
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload
 # directory and show it on the browser, so if the user uploads
 # an image, that image is going to be show after the upload
+# @app.route('/uploads/<filename>')
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
+
+@app.route('/analyze', methods = ['GET', 'POST'])
+def func_call_analyze():#image_url,saved_at):
+    form = UploadAnalyze()
+    if form.validate_on_submit():
+        flash('User uploaded their own image and chose to analyze with: ' + "IAMHERE")#form.HowAnalyze.data )
+        return redirect('/')
+    return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
+    
 #######################
     
 if __name__ == '__main__':

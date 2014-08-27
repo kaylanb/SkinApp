@@ -1,0 +1,32 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+{% if image_url and saved_at %}
+    <h1>Use this image:</h1>
+    <figure>
+        <img src={{image_url}} width="200" height="200">
+        <figcaption>Saved locally in: {{saved_at}}</figcaption>
+    </figure>
+{% endif %}
+<h1>Now, how do you want to analyze it?</h1>
+<form action="" method="post" name="login">
+    {{form.hidden_tag()}}
+    <p><label for="title">{{form.HowAnalyze.label}}</label><br/>
+        {{form.HowAnalyze}}
+        {% if form.HowAnalyze.errors %}
+        <ul class="errors">
+            {% for error in form.HowAnalyze.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </p>
+    <p><input type="submit" value="Analyze!"></p>
+</form>
+{% endblock %} 
+
+
+{% if image_url and saved_at %}
+        
+    {% endif %}
