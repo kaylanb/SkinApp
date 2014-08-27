@@ -3,12 +3,14 @@
 
 {% block content %}
 {% if image_url and saved_at %}
-    <h1>Use this image:</h1>
+    <h1>Use this image?</h1>
     <figure>
         <img src={{image_url}} width="200" height="200">
         <figcaption>Saved locally in: {{saved_at}}</figcaption>
     </figure>
+    <p><input type="submit" value="Yes"></p>
 {% endif %}
+<!-- 
 <h1>Now, how do you want to analyze it?</h1>
 <form action="" method="post" name="login">
     {{form.hidden_tag()}}
@@ -24,9 +26,5 @@
     </p>
     <p><input type="submit" value="Analyze!"></p>
 </form>
+ -->
 {% endblock %} 
-
-
-{% if image_url and saved_at %}
-        
-    {% endif %}

@@ -114,6 +114,9 @@ def upload_start_pt():
     return render_template('upload.html')
 
 
+class TestRedirectForm(Form):
+    remember_me = BooleanField('remember_me', default = False)
+
 # Route that will process the file upload
 @app.route('/upload/savefile', methods=['GET','POST'])
 def upload():
@@ -132,7 +135,11 @@ def upload():
 #         return redirect(url_for('uploaded_file',
 #                                 filename=filename))
         image_url=url_for('uploaded_file',filename=filename)
-        return redirect(url_for('func_call_analyze'))#,image_url=image_url,saved_at=saved_at))
+        form =TestRedirectForm()
+        if request.method == 'POST':
+            return redirect('/analyze')#,image_url=image_url,saved_at=saved_at))
+        return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
+        
 
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload
@@ -146,11 +153,12 @@ def uploaded_file(filename):
 
 @app.route('/analyze', methods = ['GET', 'POST'])
 def func_call_analyze():#image_url,saved_at):
-    form = UploadAnalyze()
-    if form.validate_on_submit():
-        flash('User uploaded their own image and chose to analyze with: ' + "IAMHERE")#form.HowAnalyze.data )
-        return redirect('/')
-    return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
+    return "successfully redirected to /analyze!"
+    # form = UploadAnalyze()
+#     if form.validate_on_submit():
+#         flash('User uploaded their own image and chose to analyze with: ' + "IAMHERE")#form.HowAnalyze.data )
+#         return redirect('/')
+#     return render_template('upload_analyze.html',image_url=image_url,saved_at=saved_at,form=form)
     
 #######################
     
