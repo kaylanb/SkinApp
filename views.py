@@ -106,13 +106,12 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
-#webpage with form for user upload local file
+#shows html form for user to upload local file
 @app.route('/upload')
 def upload():
     return render_template('upload.html')
 
-
-# Route that will process the file upload
+#follows upload(), receives uploaded file
 @app.route('/upload_process', methods=['POST'])
 def upload_process():
     # Get the name of the uploaded file
@@ -141,11 +140,63 @@ def get_image_url(filename):
 #     return send_from_directory(app.config['UPLOAD_FOLDER'],
 #                                "engage_1ps.jpg")
 
-#webpage showing uploaded image and form to select options for analyzing image
-@app.route('/upload/analyze/')
-@app.route('/upload/analyze/<filename>')
+class HowAnalyze(Form):
+    choices= [("1","Blob"),('2','HOG'),('3',"Blob and HOG")]
+    func= SelectMultipleField("HowAnalyze",choices=choices)
+    choices= [('1','basic'),('2','detailed')]
+    output= SelectField("what output",choices=choices)
+
+#flask wtforms to show uploaded image and html for for user select how analyze image
+# @app.route('/upload/analyze')
+# @app.route('/upload/analyze/<filename>')
+# def upload_analyze(filename):
+#     form= HowAnalyze()
+#     if form.validate_on_submit():
+#         # flash('User Sees: %s, test= %s' % \
+# #             (form.UserSees.data))
+#         return redirect( url_for('get_image_url',filename) )
+#     return render_template('upload.html',filename=filename,form=form)
+# 
+#        <form action="" method="post" name="temp">
+#             {{form.hidden_tag()}}
+#             <p><label for="title">{{form.func.label}}</label><br/>
+#                 {{form.func}}
+#             </p>
+#             <p><label for="title">{{form.output.label}}</label><br/>
+#                 {{form.output}}
+#             </p>
+#             <p><input type="submit" name='Analyze' value="Analyze"></p>
+#         </form>
+
+#pure html to show uploaded image and html for for user select how analyze image
+@app.route('/upload/analyze',methods=['GET','POST'])
+@app.route('/upload/analyze/<filename>',methods=['GET','POST'])
 def upload_analyze(filename):
+#     if request.method == 'POST':
+#         return "hello"
+#         username= request.form.username
+#         return redirect( url_for('get_image_url',filename=filename) )
+    print "filename= %s" % filename
     return render_template('upload.html',filename=filename)
+
+@app.route('/upload/analyze_CalcStuff',methods=['GET','POST'])
+def upload_analyze_CalcStuff():
+    if request.method == 'POST':
+        print request.form.keys()
+#         print request.method['print']
+#         print request.method['method']
+        for key, val in request.form.iteritems():
+            print key, val
+        return redirect( url_for('ML_on_upload',filename=request.form["filename"]))
+
+@app.route('/upload/analyze/ML')
+@app.route('/upload/analyze/ML/<filename>')
+def ML_on_upload(filename):
+    image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    print "path to image: %s" % image
+    return "in ML_on_upload"
+
+
   
 #######################
     

@@ -82,51 +82,22 @@ def recall(predict,ans):
         (tp_norm,fn_norm,rec)
     return rec,tp_norm,fn_norm
 
-def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_spl=2,scale=False):
-    Food=Food_all.ix[:,2:]
-    People=People_all.ix[:,2:]
-
-    sh= Food.values.shape
-    max=int(sh[0]/2.)
-    TrainF= Food.values[0:max,:]
-    TestF = Food.values[max:,:]
-    #want urls in test set to find image user selects
-    TestF_URL= Food_all.URL.values[max:]
-    
-    sh= People.values.shape
-    max=int(sh[0]/2.)
-    TrainP= People.values[0:max,:]
-    TestP = People.values[max:,:]
-    #want urls in test set to find image user selects
-    TestP_URL= People_all.URL.values[max:]
-
-    TrainX = concatenate([TrainP, TrainF])
-    TestX = concatenate([TestP, TestF])
-    #want urls in test set to find image user selects
-    TestX_URL = concatenate([TestP_URL, TestF_URL])
-    
-    TrainY = concatenate([zeros(len(TrainP)), ones(len(TrainF))])
-    TestY = concatenate([zeros(len(TestP)), ones(len(TestF))])
-    
-    if scale:## SCALE X DATA
-        from sklearn import preprocessing
-        TrainX = preprocessing.scale(TrainX)
-        TestX = preprocessing.scale(TestX)
-    
-    # forest1 = RandomForestClassifier(n_estimators=n_estim, max_depth=None,
-#                                      min_samples_split=min_samples_spl, random_state=0,
-#                                     compute_importances=True)
-#     forest1.fit(TrainX,TrainY)
-#     forestOut1 = forest1.predict(TestX)
-#     precision(forestOut1,TestY)
+def best_machine_learn_NoRandOrd(TrainX,TrainY,TestX,/
+                                n_estim=100,min_samples_spl=2,scale=False):
+    forest1 = RandomForestClassifier(n_estimators=n_estim, max_depth=None,
+                                     min_samples_split=min_samples_spl, random_state=0,
+                                    compute_importances=True)
+    forest1.fit(TrainX,TrainY)
+    forestOut1 = forest1.predict(TestX)
+    # precision(forestOut1,TestY)
 #     recall(forestOut1,TestY)
 #     print sum(forestOut1 == TestY)/float(len(forestOut1))
 
-    forest2 = ExtraTreesClassifier(n_estimators=n_estim, max_depth=None,
-                                   min_samples_split=min_samples_spl, random_state=0,
-                                    compute_importances=True)
-    forest2.fit(TrainX,TrainY)
-    forestOut2 = forest2.predict(TestX)
+    # forest2 = ExtraTreesClassifier(n_estimators=n_estim, max_depth=None,
+#                                    min_samples_split=min_samples_spl, random_state=0,
+#                                     compute_importances=True)
+#     forest2.fit(TrainX,TrainY)
+#     forestOut2 = forest2.predict(TestX)
 #     precision(forestOut2,TestY)
 #     recall(forestOut2,TestY)
 #     print sum(forestOut2 == TestY)/float(len(forestOut2))
@@ -154,31 +125,82 @@ def best_machine_learn_NoRandOrd(Food_all,People_all, n_estim=100,min_samples_sp
 #         print "forest\n", f1_df.head()
 #         print "forest2\n",f2_df.head()
 #     return forestOut2,TestY,TestX,cTestP,cTestF,People_all,Food_all
-    return forest2,forestOut2,TestY,TestX_URL
+    return forest1,forestOut1
 
-# def run():
-Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
-Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
-SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
-Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
-Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
-SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
+def Train_the_RandomForest():
+    Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
+    Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
+    SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
+    Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
+    Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
+    SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
 
-#team feature numbers for different definitions of Food,People
-team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-#kay feature numbers for different definitions of Food,People
-kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
-#kay feature numbers + team feature number for skin maps for different definitions of Food,People
-extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
-                    Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
-kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
+    #team feature numbers for different definitions of Food,People
+    team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+    #kay feature numbers for different definitions of Food,People
+    kay= Team_or_Kay_Features(Food_KayF,Faces_KayF,SkinNoFaces_KayF)
+    #kay feature numbers + team feature number for skin maps for different definitions of Food,People
+    extend= AddTeamCols(Food_KayF,Faces_KayF,SkinNoFaces_KayF, 
+                        Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
+    kay_extend= Team_or_Kay_Features(extend.Food,extend.Faces,extend.SkinNoFaces)
 
-#run ML on Food vs. People train/test set of choice
-(f2,fout2,TestY,TestX_URL)= best_machine_learn_NoRandOrd(kay_extend.NoLims.Food,kay_extend.NoLims.People, 
-                                     n_estim=100,min_samples_spl=2,scale=False)
-(prec,tp_norm,fp_norm)= precision(fout2,TestY)
-(rec,tp_norm,fn_norm)=  recall(fout2,TestY)
-print np.where(fout2.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
+    ##
+    #make training and test sets
+    Food_all = kay_extend.NoLims.Food
+    People_all= kay_extend.NoLims.People
+    ###
+    Food=Food_all.ix[:,2:]
+    People=People_all.ix[:,2:]
+
+    sh= Food.values.shape
+    max=int(sh[0]/2.)
+    TrainF= Food.values[0:max,:]
+    TestF = Food.values[max:,:]
+    #want urls in test set to find image user selects
+    TestF_URL= Food_all.URL.values[max:]
+
+    sh= People.values.shape
+    max=int(sh[0]/2.)
+    TrainP= People.values[0:max,:]
+    TestP = People.values[max:,:]
+    #want urls in test set to find image user selects
+    TestP_URL= People_all.URL.values[max:]
+
+    TrainX = concatenate([TrainP, TrainF])
+    TestX = concatenate([TestP, TestF])
+    #want urls in test set to find image user selects
+    TestX_URL = concatenate([TestP_URL, TestF_URL])
+
+    TrainY = concatenate([zeros(len(TrainP)), ones(len(TrainF))])
+    TestY = concatenate([zeros(len(TestP)), ones(len(TestF))])
+
+    scale=False
+    if scale:## SCALE X DATA
+        from sklearn import preprocessing
+        TrainX = preprocessing.scale(TrainX)
+        TestX = preprocessing.scale(TestX)
+
+    #run ML on Food vs. People train/test set of choice
+    RF = RandomForestClassifier(n_estimators=100, max_depth=None,
+                                         min_samples_split=2, random_state=0,
+                                        compute_importances=True)
+    RF.fit(TrainX,TrainY)
+    return RF
+
+def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(image):
+    import Blob_Features as BF
+    BF.ComputeBlobFeatures(image) #outputs feature .csv to 'tmp/BlobFeatures.csv"
+                          #outputs feature plot to 'tmp/BlobFeaturesPlot.png'
+    features_df = read_csv('tmp/BlobFeatures.csv')
+    features_need=featurs_df.ix[0,2:]
+    TestX= features_need.values
+    
+    RF= Train_the_RandomForest()    
+    RF_predict = RF.predict(TestX)
+
+(prec,tp_norm,fp_norm)= precision(RF_predict,TestY)
+(rec,tp_norm,fn_norm)=  recall(RF_predict,TestY)
+print np.where(RF_predict.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
 
 # 
 # url= TestX_URL[50]
