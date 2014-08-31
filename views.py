@@ -13,6 +13,9 @@ import os
 from flask import request, url_for, send_from_directory
 from werkzeug import secure_filename
 
+#for ML results on images
+import matplotlib.image as mpimg
+
 
 app = Flask(__name__)
 app.config.from_object('config')
@@ -192,9 +195,14 @@ def upload_analyze_CalcStuff():
 @app.route('/upload/analyze/ML')
 @app.route('/upload/analyze/ML/<filename>')
 def ML_on_upload(filename):
-    image=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    print "path to image: %s" % image
-    return "in ML_on_upload"
+    #redirect to html first, print loading, then call functions then call html again but with results
+    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image= mpimg.imread(file)
+    import Blob_Features as BF
+    blob_results= BF.BlobMethod_on_Image(image,file)
+    print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
+    (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
+    return "printed results to terminal"
 
 
   

@@ -5,15 +5,11 @@ from matplotlib import image as mpimg
 from scipy import ndimage, fftpack, stats
 from skimage import exposure, measure,feature,filter
 from pandas import DataFrame, read_csv
-from PIL import Image
-import cStringIO
-from urllib2 import urlopen, HTTPError
 import numpy as np
 from skimage.filter import sobel
 from skimage.morphology import convex_hull_image
 from scipy.spatial import ConvexHull
 import matplotlib.patches
-import glob
 import pickle
 #personal modules
 import skinmap as sm
@@ -32,16 +28,12 @@ def precision(predict,ans):
     prec= tp(predict,ans)/(tp(predict,ans) + fp(predict,ans))
     tp_norm= tp(predict,ans)/totp(ans)
     fp_norm= fp(predict,ans)/totp(ans)
-    print "tp/totp,fp/totp,precision= %f %f %f" % \
-        (tp_norm,fp_norm,prec)
     return prec,tp_norm,fp_norm
 
 def recall(predict,ans):
     rec= tp(predict,ans)/(tp(predict,ans) + fn(predict,ans))
     tp_norm= tp(predict,ans)/totp(ans)
     fn_norm= fn(predict,ans)/totn(ans)
-    print "tp/totp,fn/totn,recall= %f %f %f" % \
-        (tp_norm,fn_norm,rec)
     return rec,tp_norm,fn_norm
 
 def fraction_correct(predict,ans):
@@ -145,7 +137,7 @@ def PlotBlobFeatures(Figs):
         [label.set_visible(False) for label in ax[cnt].get_xticklabels()]
         [label.set_visible(False) for label in ax[cnt].get_yticklabels()]
     plt.savefig("tmp/BlobFeaturesPlot.png")
-    plt.show()
+#     plt.show()
     
 
 def extract_features_and_feature_Figs_to_plot(n_images,nth_image,rgb_image,image_name):
@@ -269,7 +261,16 @@ def ComputeBlobFeatures(rgb_image,image_name):
     features_df.to_csv("tmp/BlobFeatures.csv")
     PlotBlobFeatures(Figs)
 
-def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name):
+class MLResults():
+    def __init__(self):
+        self.HasPeople= -1
+        self.frac_correct=-1
+        self.precision=-1
+        self.recall=-1
+        self.tp_norm=-1
+        self.fp_norm=-1
+
+def BlobMethod_on_Image(rgb_image,image_name):
     #create feature file and feature explanatory image plot: 
     #'tmp/BlobFeatures.csv' and 'tmp/BlobFeaturesPlot.png'
     ComputeBlobFeatures(rgb_image,image_name)
@@ -282,8 +283,10 @@ def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name):
     RF=pickle.load(fin)
     fin.close()
     image_predict = RF.predict(image_features)
-    if image_predict.astype('int')[0] == 0: print "Blobs: uploaded image contains PEOPLE"
-    elif image_predict.astype('int')[0] == 1: print "Blobs: uploaded image contains FOOD"
+    #store results
+    blob_results= MLResults()
+    if image_predict.astype('int')[0] == 0: blob_results.HasPeople= True
+    elif image_predict.astype('int')[0] == 1: blob_results.HasPeople= False
     else: raise ValueError
     #get accuracy of Blob Method
     f_results= "machine_learn/Blob/TestImageSet_predictions_answers.pickle"
@@ -296,23 +299,23 @@ def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name):
         print "try running: 'python machine_learn/Build_ML_Results/build.py' "
     predict= results_df.predict.values
     answer= results_df.answer.values
-    
     (prec,tp_norm,fp_norm)= precision(predict,answer)
     (rec,tp_norm,fn_norm)=  recall(predict,answer)
     frac_correct= fraction_correct(predict,answer)
-    print "frac_correct: %f, prec: %f, recall: %f, tp_norm: %f, fp_norm: %f" % \
-            (frac_correct, prec, rec,tp_norm,fp_norm)
+    #store results
+    blob_results.frac_correct= frac_correct
+    blob_results.precision=prec
+    blob_results.recall= rec
+    blob_results.tp_norm= tp_norm
+    blob_results.fp_norm= fp_norm
+    return blob_results
 
 
-#testing
-urlFile = 'machine_learn/training_image_urls/NewTraining_Faces_everyones.txt'
-urls = np.loadtxt(urlFile, dtype="str")
-url=urls[10]
-read = urlopen(url).read()
-rgb_image = np.array( Image.open(cStringIO.StringIO(read)) )
-#####
-image_name="name of image user uploaded"
-ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name)
-
+###testing 
+# import matplotlib.image as mpimg
+# file='uploads/engage_1ps.jpg'
+# img= mpimg.imread(file)
+# blob_results= BlobMethod_on_Image(img,file)
+# print "blob_results.HasPeople= %s" % blob_results.HasPeople
 
 
