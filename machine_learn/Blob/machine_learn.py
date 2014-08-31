@@ -6,8 +6,8 @@ import numpy as np
 from pandas import read_csv, DataFrame, concat
 
 # from sklearn.cross_validation import cross_val_score
-# from sklearn.ensemble import RandomForestClassifier
-from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.ensemble import RandomForestClassifier
+# from sklearn.ensemble import ExtraTreesClassifier
 # from sklearn.ensemble import AdaBoostClassifier
 # from sklearn.tree import DecisionTreeClassifier
 
@@ -82,7 +82,12 @@ def recall(predict,ans):
         (tp_norm,fn_norm,rec)
     return rec,tp_norm,fn_norm
 
-def best_machine_learn_NoRandOrd(TrainX,TrainY,TestX,/
+def fraction_correct(predict,ans):
+    tp= float( len(np.where(predict.astype('bool') & ans.astype('bool'))[0]) )
+    tn= float( len(np.where( (predict.astype('bool')==False) & (ans.astype('bool')==False) )[0]) )
+    return (tp+tn)/len(ans)
+
+def best_machine_learn_NoRandOrd(TrainX,TrainY,TestX,\
                                 n_estim=100,min_samples_spl=2,scale=False):
     forest1 = RandomForestClassifier(n_estimators=n_estim, max_depth=None,
                                      min_samples_split=min_samples_spl, random_state=0,
@@ -128,12 +133,12 @@ def best_machine_learn_NoRandOrd(TrainX,TrainY,TestX,/
     return forest1,forestOut1
 
 def Train_the_RandomForest():
-    Food_KayF = read_csv('features_and_ml/NewTraining_Food_everyones_KFeat_Toddmap.csv')
-    Faces_KayF = read_csv('features_and_ml/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
-    SkinNoFaces_KayF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
-    Food_TeamF = read_csv('features_and_ml/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
-    Faces_TeamF = read_csv('features_and_ml/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
-    SkinNoFaces_TeamF = read_csv('features_and_ml/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
+    Food_KayF = read_csv('csv_features/NewTraining_Food_everyones_KFeat_Toddmap.csv')
+    Faces_KayF = read_csv('csv_features/NewTraining_Faces_everyones_KFeat_Toddmap.csv')
+    SkinNoFaces_KayF = read_csv('csv_features/NewTraining_SkinNoFaces_everyones_KFeat_Toddmap.csv')
+    Food_TeamF = read_csv('csv_features/NewTraining_Food_everyones_TeamFeat_Toddmap.csv')
+    Faces_TeamF = read_csv('csv_features/NewTraining_Faces_everyones_TeamFeat_Toddmap.csv')
+    SkinNoFaces_TeamF = read_csv('csv_features/NewTraining_SkinNoFaces_everyones_TeamFeat_Toddmap.csv')
 
     #team feature numbers for different definitions of Food,People
     team= Team_or_Kay_Features(Food_TeamF,Faces_TeamF,SkinNoFaces_TeamF)
@@ -185,23 +190,25 @@ def Train_the_RandomForest():
                                          min_samples_split=2, random_state=0,
                                         compute_importances=True)
     RF.fit(TrainX,TrainY)
-    return RF
+    return RF, TestX,TestY,TestX_URL
 
-def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(image):
-    import Blob_Features as BF
-    BF.ComputeBlobFeatures(image) #outputs feature .csv to 'tmp/BlobFeatures.csv"
-                          #outputs feature plot to 'tmp/BlobFeaturesPlot.png'
-    features_df = read_csv('tmp/BlobFeatures.csv')
-    features_need=featurs_df.ix[0,2:]
-    TestX= features_need.values
-    
-    RF= Train_the_RandomForest()    
-    RF_predict = RF.predict(TestX)
+def output_results():
+    (RF, TestX,TestY,TestX_URL)= Train_the_RandomForest()   
+    Y_predict= RF.predict(TestX)
+    results_df= DataFrame()
+    results_df["url"]=TestX_URL
+    results_df["answer"]=TestY
+    results_df["predict"]=Y_predict
+    import pickle
+    fout = open("RandForestTrained.pickle", 'w') 
+    pickle.dump(RF, fout)
+    fout.close()
+    fout = open("TestImageSet_predictions_answers.pickle", 'w') 
+    pickle.dump(results_df, fout)
+    fout.close()
 
-(prec,tp_norm,fp_norm)= precision(RF_predict,TestY)
-(rec,tp_norm,fn_norm)=  recall(RF_predict,TestY)
-print np.where(RF_predict.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
-
+# print np.where(Y_predict.astype('int') == TestY.astype('int'))[0].shape[0]/float(TestX_URL.size)
+# 
 # 
 # url= TestX_URL[50]
 # ind=np.where(TestX_URL == url)[0]
@@ -210,16 +217,6 @@ print np.where(RF_predict.astype('int') == TestY.astype('int'))[0].shape[0]/floa
 #     print "good"
 #     ind=ind[0]
 
-try: 
-    f=open("tmp/ml_results.csv","r")
-    print "results.csv already exists"
-except IOError:
-    #if get here, file does not exist
-    df= DataFrame()
-    df["ans"]=TestY
-    df["predict"]=fout2
-    df["url"]=TestX_URL
-    df.to_csv("tmp/ml_results.csv",index=True)
-    print "output results.csv"
+
 
 

@@ -1,0 +1,12 @@
+Outputs of 'python run.py'  
+============================================================== 
+1. RandForestTrained.pickle: RandomForest classifier trained on our test image set, set to variable and saved as variable to file
+2. TestImageSet_predictions_answers.pickle: pandas dataframe variable saved to file, containing three columns: url of test data set image, answer (0 for People, 1 for Food), RandomForest classifier prediction given features
+
+run.py
+======
+calls machine_learn.py and loads blob features from csv files, trains the RandomForest classifier, predicts on TestImageSet features and outputs 'RandomForest_classifier.pickle' and 'TestImageSet_predictions_answers.pickle'   
+
+csv_features/
+=============
+NewTraining_*.csv: Blob features files

@@ -4,7 +4,7 @@ from matplotlib import pyplot as plt
 from matplotlib import image as mpimg
 from scipy import ndimage, fftpack, stats
 from skimage import exposure, measure,feature,filter
-from pandas import DataFrame
+from pandas import DataFrame, read_csv
 from PIL import Image
 import cStringIO
 from urllib2 import urlopen, HTTPError
@@ -14,8 +14,40 @@ from skimage.morphology import convex_hull_image
 from scipy.spatial import ConvexHull
 import matplotlib.patches
 import glob
+import pickle
 #personal modules
 import skinmap as sm
+
+def totp(ans):
+    return float( np.sum(ans.astype('bool')) )
+def totn(ans):
+    return float( np.sum(ans.astype('bool') == False) )
+def tp(predict,ans):
+    return float( len(np.where(predict.astype('bool') & ans.astype('bool'))[0]) )
+def fp(predict,ans):
+    return float( len(np.where((predict.astype('bool')==False) & ans.astype('bool'))[0]) )
+def fn(predict,ans):
+    return float( len(np.where((predict.astype('bool')) & (ans.astype('bool')==False))[0]) )
+def precision(predict,ans):
+    prec= tp(predict,ans)/(tp(predict,ans) + fp(predict,ans))
+    tp_norm= tp(predict,ans)/totp(ans)
+    fp_norm= fp(predict,ans)/totp(ans)
+    print "tp/totp,fp/totp,precision= %f %f %f" % \
+        (tp_norm,fp_norm,prec)
+    return prec,tp_norm,fp_norm
+
+def recall(predict,ans):
+    rec= tp(predict,ans)/(tp(predict,ans) + fn(predict,ans))
+    tp_norm= tp(predict,ans)/totp(ans)
+    fn_norm= fn(predict,ans)/totn(ans)
+    print "tp/totp,fn/totn,recall= %f %f %f" % \
+        (tp_norm,fn_norm,rec)
+    return rec,tp_norm,fn_norm
+
+def fraction_correct(predict,ans):
+    tp= float( len(np.where(predict.astype('bool') & ans.astype('bool'))[0]) )
+    tn= float( len(np.where( (predict.astype('bool')==False) & (ans.astype('bool')==False) )[0]) )
+    return (tp+tn)/len(ans)
 
 def SepPts((x1,y1),(x2,y2)):
         return np.sqrt( (x2-x1)**2 + (y2-y1)**2 )
@@ -118,6 +150,7 @@ def PlotBlobFeatures(Figs):
 
 def extract_features_and_feature_Figs_to_plot(n_images,nth_image,rgb_image,image_name):
     cols= [
+    'UserUploadedImageName',
     'percent_skin_SkinLikelihood_6',
     'percent_skin_abg',
     'percent_skin_cbcr',
@@ -236,18 +269,50 @@ def ComputeBlobFeatures(rgb_image,image_name):
     features_df.to_csv("tmp/BlobFeatures.csv")
     PlotBlobFeatures(Figs)
 
+def ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name):
+    #create feature file and feature explanatory image plot: 
+    #'tmp/BlobFeatures.csv' and 'tmp/BlobFeaturesPlot.png'
+    ComputeBlobFeatures(rgb_image,image_name)
+    #predict based on features
+    features_df = read_csv('tmp/BlobFeatures.csv')
+    features_need=features_df.ix[0,2:]
+    image_features= features_need.values
+    #load trained Random Forest Classifier
+    fin=open("machine_learn/Blob/RandForestTrained.pickle","r")
+    RF=pickle.load(fin)
+    fin.close()
+    image_predict = RF.predict(image_features)
+    if image_predict.astype('int')[0] == 0: print "Blobs: uploaded image contains PEOPLE"
+    elif image_predict.astype('int')[0] == 1: print "Blobs: uploaded image contains FOOD"
+    else: raise ValueError
+    #get accuracy of Blob Method
+    f_results= "machine_learn/Blob/TestImageSet_predictions_answers.pickle"
+    try: 
+        fin=open(f_results,"r")
+        results_df=pickle.load(fin)
+        fin.close()
+    except IOError:
+        print "ERROR: %s does not exist, cannot determine accuracy of Blob Method" % f_results
+        print "try running: 'python machine_learn/Build_ML_Results/build.py' "
+    predict= results_df.predict.values
+    answer= results_df.answer.values
+    
+    (prec,tp_norm,fp_norm)= precision(predict,answer)
+    (rec,tp_norm,fn_norm)=  recall(predict,answer)
+    frac_correct= fraction_correct(predict,answer)
+    print "frac_correct: %f, prec: %f, recall: %f, tp_norm: %f, fp_norm: %f" % \
+            (frac_correct, prec, rec,tp_norm,fp_norm)
 
-urlFile = 'training_image_urls/NewTraining_Faces_everyones.txt'
+
+#testing
+urlFile = 'machine_learn/training_image_urls/NewTraining_Faces_everyones.txt'
 urls = np.loadtxt(urlFile, dtype="str")
 url=urls[10]
 read = urlopen(url).read()
 rgb_image = np.array( Image.open(cStringIO.StringIO(read)) )
-
+#####
 image_name="name of image user uploaded"
-ComputeBlobFeatures(rgb_image,image_name)
+ComputeBlobFeatures_ReadInFeatursCSV_PredictwRF(rgb_image,image_name)
 
-# obj= sm.SetUpImage(image)
-# im= obj.SkinLikelihood()
-# SkinFilter= FilterSlice(im,6)  #6 is best value, 7 too retrictive, < 6 not great
-# extract_features(image,SkinFilter,labels_df,index)
+
 
