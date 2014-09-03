@@ -186,25 +186,32 @@ def upload_analyze(filename):
 def upload_analyze_CalcStuff():
     if request.method == 'POST':
         print request.form.keys()
-#         print request.method['print']
-#         print request.method['method']
         for key, val in request.form.iteritems():
             print key, val
-        return redirect( url_for('ML_on_upload',filename=request.form["filename"]))
+        if request.form['HowAnalyze'] == "Blob":
+            return redirect( url_for('Blob_only',filename=request.form["filename"]))
+        elif request.form['HowAnalyze'] == "HOG":
+            return redirect( url_for('HOG_only',filename=request.form["filename"]))
+        else: return "neither Blob nor HOG alone"
 
-@app.route('/upload/analyze/ML')
+# @app.route('/upload/analyze/ML')
 @app.route('/upload/analyze/ML/<filename>')
-def ML_on_upload(filename):
-    #redirect to html first, print loading, then call functions then call html again but with results
+def Blob_only(filename):
+    #insert if, elif, else to show appropriate html file depending if HOG, Blob, or bothredirect to html first, print loading, then call functions then call html again but with results
     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image= mpimg.imread(file)
     import Blob_Features as BF
     blob_results= BF.BlobMethod_on_Image(image,file)
     print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
     (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
-    return "printed results to terminal"
+    return "Blob only"#render_template('Blob_and_HOG_results.html',filename=filename,\
+                #blob_results=blob_results)
 
-
+@app.route('/upload/analyze/HOG_only/<filename>')
+def HOG_only(filename):
+    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    image= mpimg.imread(file)
+    return "HOG_only"
   
 #######################
     
