@@ -1,5 +1,4 @@
-#http://pydoc.net/Python/scikits-image/0.4.2/skimage.feature.hog/
-import skinmap as sm
+'''outputs features for HOG machine learning'''
 from matplotlib import pyplot as plt
 from matplotlib import image as mpimg
 from scipy import sqrt, pi, arctan2, cos, sin, ndimage, fftpack, stats
@@ -10,17 +9,26 @@ import cStringIO
 import urllib2
 import numpy as np
 from pylab import *
+#http://pydoc.net/Python/scikits-image/0.4.2/skimage.feature.hog/
+
 
 #http://pydoc.net/Python/scikits-image/0.4.2/skimage.feature.hog/
 
 #labels_df = pd.DataFrame(columns=['blocks'])
 
 #get url
-file="../training_image_urls/NewTraining_Faces_everyones.txt" #'People_All.txt'
+file="../training_image_urls/NewTraining_SkinNoFaces_everyones.txt"
 urls=np.loadtxt(file,dtype="str")
-nrow = len(urls)
-count = 0
 
+url_good_list=[]
+for url in urls:
+    try:
+        read= urllib2.urlopen(url).read()
+        url_good_list.append(url)
+    except urllib2.URLError:
+        continue
+
+nrow = len(url_good_list)
 #labels_df = np.zeros((nrow, 8100)) #People_Feature_7.csv Food_Feature_7.csv
 #labels_df = np.zeros((nrow, 15390)) #People_Feature_8.csv Food_Feature_8.csv
 #labels_df = np.zeros((nrow, 1296)) #People_Feature_9.csv Food_Feature_9.csv
@@ -34,14 +42,11 @@ count = 0
 #labels_df = np.zeros((nrow, 14400)) #People_All_6.csv Food_All_6.csv
 #labels_df = np.zeros((nrow, 1296)) #People_All_7.csv Food_All_7.csv
 #labels_df = np.zeros((nrow, 1296)) #People_All_8.csv Food_All_8.csv
-labels_df = np.zeros((nrow, 900)) #People_All_9.csv Food_All_9.csv
+feat = np.zeros((nrow, 900)) #People_All_9.csv Food_All_9.csv
 
-for url in urls:
-    print url,
-    try:
-        read= urllib2.urlopen(url).read()
-    except urllib2.URLError:
-        continue
+count=0
+for url in url_good_list:
+    read= urllib2.urlopen(url).read()
     obj = Image.open( cStringIO.StringIO(read) )
     img = np.array(obj.convert('L'))
     #blocks = feature.hog(img, pixels_per_cell=(50, 50), cells_per_block=(3, 3), visualise=False, normalise=True) #People_Feature_7.csv Food_Feature_7.csv
@@ -75,8 +80,12 @@ for url in urls:
     #if(len(blocks) == 1296): #People_All_7.csv Food_All_7.csv
     #if(len(blocks) == 1296): #People_All_8.csv Food_All_8.csv
     if(len(blocks) == 900): #People_All_9.csv Food_All_9.csv
-        labels_df[count] = blocks
+        feat[count] = blocks
     count += 1
-    
-#labels_df.to_csv("Food_Features_10.csv")
-np.savetxt("People_All_9.csv", labels_df, delimiter=",")
+
+urls_df=pd.DataFrame()
+urls_df["urls"]= url_good_list
+feat_df= pd.DataFrame(feat)
+final_df=pd.concat([urls_df,feat_df],axis=1) 
+name="csv_features/hog_features_9_NewTraining_SkinNoFaces_everyones.csv"
+final_df.to_csv(name)

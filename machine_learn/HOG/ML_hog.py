@@ -13,8 +13,8 @@ from sklearn.tree import DecisionTreeRegressor
 from sklearn.naive_bayes import GaussianNB
 from sklearn import svm
 
-Food = read_csv('Food_All_3.csv')
-People = read_csv('People_All_3.csv')
+Food = read_csv('csv_features/hog_features_9_NewTraining_Food_everyones.csv')
+People = read_csv('csv_features/hog_features_9_NewTraining_Faces_everyones.csv')
 
 print "Data loaded"
 
@@ -33,7 +33,8 @@ FN6=zeros(100)
 
 combined_array = zeros((10, 100))
 
-for n in range(0,100):
+# for n in range(0,100):
+for n in range(0,5):
     print n
     
     cTrainF = rand(len(Food)) > .3
@@ -46,30 +47,32 @@ for n in range(0,100):
     TrainY = concatenate([ones(len(People[cTrainP])), zeros(len(Food[cTrainF]))])
     TestY = concatenate([ones(len(People[cTestP])), zeros(len(Food[cTestF]))])
 
-    print "Test/train selected"
+#     print "Test/train selected"
 
     P[n] = len(People[cTestP])
     N[n] = len(Food[cTestF])
 
     forest2 = ExtraTreesClassifier(n_estimators=50, max_depth=None, min_samples_split=1, random_state=0)
     forest2.fit(TrainX,TrainY)
-    forestOut2 = forest2.predict(TestX)                             
+    forestOut2 = forest2.predict(TestX)  
+    print "ET:",fourestOut2.shape,fourestOut2.shape                            
     TP2[n] = sum(forestOut2[0:P[n]] == TestY[0:P[n]])
     TN2[n] = sum(forestOut2[P[n]+1:] == TestY[P[n]+1:])
     FP2[n] = N[n] - TN2[n]
     FN2[n] = P[n] - TP2[n]
 
-    print "ET classifier completed"
+#     print "ET classifier completed"
 
     clf2 = svm.LinearSVC()
     clf2.fit(TrainX,TrainY)
     clfOut2 = clf2.predict(TestX)
+    print "SVM:", clfOut2, clfOut2.shape
     TP6[n] = sum(clfOut2[0:P[n]] == TestY[0:P[n]])
     TN6[n] = sum(clfOut2[P[n]+1:] == TestY[P[n]+1:])
     FP6[n] = N[n] - TN6[n]
     FN6[n] = P[n] - TP6[n]
 
-    print "SVM classifier completed"
+#     print "SVM classifier completed"
 
-combined_array = [P, N, TP2, TN2, FP2, FN2, TP6, TN6, FP6, FN6]
-savetxt("ML_training_3.csv", combined_array, delimiter=",")
+# combined_array = [P, N, TP2, TN2, FP2, FN2, TP6, TN6, FP6, FN6]
+# savetxt("ML_output.csv", combined_array, delimiter=",")
