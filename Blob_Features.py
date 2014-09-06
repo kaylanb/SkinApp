@@ -136,7 +136,7 @@ def PlotBlobFeatures(Figs):
         ax[cnt].set_title(title,fontdict={'fontsize':10.})
         [label.set_visible(False) for label in ax[cnt].get_xticklabels()]
         [label.set_visible(False) for label in ax[cnt].get_yticklabels()]
-    plt.savefig("tmp/BlobFeaturesPlot.png")
+    plt.savefig("tmp/BlobFeaturesPlot.png",bbox_inches='tight')
 #     plt.show()
     
 

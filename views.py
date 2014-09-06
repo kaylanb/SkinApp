@@ -15,6 +15,9 @@ from werkzeug import secure_filename
 
 #for ML results on images
 import matplotlib.image as mpimg
+from PIL import Image
+import sys
+import pickle
 
 
 app = Flask(__name__)
@@ -189,30 +192,79 @@ def upload_analyze_CalcStuff():
         for key, val in request.form.iteritems():
             print key, val
         if request.form['HowAnalyze'] == "Blob":
-            return redirect( url_for('Blob_only',filename=request.form["filename"]))
+            return redirect( url_for('Blob_results',filename=request.form["filename"]))
         elif request.form['HowAnalyze'] == "HOG":
-            return redirect( url_for('HOG_only',filename=request.form["filename"]))
-        else: return "neither Blob nor HOG alone"
+            return redirect( url_for('Hog_results',filename=request.form["filename"]))
+        else: 
+            return redirect( url_for('Blob_Hog_results',filename=request.form["filename"]))
+
+@app.route('/get_tmp_image_url')
+@app.route('/get_tmp_image_url/<filename>')
+def get_tmp_image_url(filename):
+    '''gets called from html files, with tag <img src={{}}'''
+    return send_from_directory('tmp/',filename)
 
 # @app.route('/upload/analyze/ML')
-@app.route('/upload/analyze/ML/<filename>')
-def Blob_only(filename):
+@app.route('/upload/analyze/Blob_results/<filename>')
+def Blob_results(filename):
     #insert if, elif, else to show appropriate html file depending if HOG, Blob, or bothredirect to html first, print loading, then call functions then call html again but with results
     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
     image= mpimg.imread(file)
     import Blob_Features as BF
-    blob_results= BF.BlobMethod_on_Image(image,file)
-    print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
-    (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
-    return "Blob only"#render_template('Blob_and_HOG_results.html',filename=filename,\
-                #blob_results=blob_results)
+    blob_stats= BF.BlobMethod_on_Image(image,file)
+    blob_fig= "BlobFeaturesPlot.png"
+    # print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
+#     (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
+    return render_template('hog_blob_results.html',\
+            blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
 
-@app.route('/upload/analyze/HOG_only/<filename>')
-def HOG_only(filename):
+@app.route('/upload/analyze/Hog_results/<filename>')
+def Hog_results(filename):
+    #load image into array
     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    obj = Image.open( file )
+    rgb_img= np.array(obj)
+    grey_img = np.array(obj.convert('L'))
+    #hog ML
+    sys.path.append('machine_learn/HOG/')
+    import predict_on_UploadImage as HogML
+    (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
+    et_ans= HogML.interpret_int_predict(et[0].astype('int'))
+    svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
+    hog_fig="image_of_hog.png"
+    #get hog stats
+    fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+    hog_stats=pickle.load(fin)
+    fin.close()
+    return render_template('hog_blob_results.html',\
+            hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats)
+    
+@app.route('/upload/analyze/Blob_Hog_results/<filename>')
+def Blob_Hog_results(filename):
+    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+    #HOG
+    obj = Image.open( file )
+    rgb_img= np.array(obj)
+    grey_img = np.array(obj.convert('L'))
+    sys.path.append('machine_learn/HOG/')
+    import predict_on_UploadImage as HogML
+    (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
+    et_ans= HogML.interpret_int_predict(et[0].astype('int'))
+    svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
+    hog_fig="image_of_hog.png"
+    fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+    hog_stats=pickle.load(fin)
+    fin.close()
+    #BLOB
     image= mpimg.imread(file)
-    return "HOG_only"
-  
+    import Blob_Features as BF
+    blob_stats= BF.BlobMethod_on_Image(image,file)
+    blob_fig= "BlobFeaturesPlot.png"
+    #load html with both Hog and Blob vars
+    return render_template('hog_blob_results.html',\
+            hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
+            blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
+
 #######################
     
 if __name__ == '__main__':

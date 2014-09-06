@@ -1,17 +1,13 @@
+'''outputs Stats for ET,SVC method for NTrial (default 10) to file using pickle'''
+
 from numpy.random import rand
 from numpy import ones, zeros, concatenate
 from pandas import read_csv, DataFrame
 from pandas import concat as pd_concat
 import matplotlib.pyplot as plt
-from numpy import savetxt
+import pickle
 
-from sklearn.cross_validation import cross_val_score
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.naive_bayes import GaussianNB
 from sklearn import svm
 
 
@@ -92,10 +88,28 @@ def doML_NTrials_Times(Food_df,People_df,NTrials):
         stats.SVC.FN[n] = stats.P[n] - stats.SVC.TP[n]
     return stats
 
+## Testing
 Food_df = read_csv('csv_features/hog_features_9_NewTraining_Food_everyones.csv')
 People_df = read_csv('csv_features/hog_features_9_NewTraining_Faces_everyones.csv')
 
-NTrials=100
+#compute average stats from NTrials
+NTrials=10
 stats = doML_NTrials_Times(Food_df,People_df,NTrials)
 stats.CalcStats()
-stats.PrintStats()
+# stats.PrintStats()
+#save stats to file for easy WebApp look up 
+et_stats={"prec":stats.ET.precision.mean(),'recall':stats.ET.recall.mean(),\
+         "fp_norm":stats.ET.FP_norm.mean(),"fn_norm":stats.ET.FN_norm.mean()}
+svc_stats={"prec":stats.SVC.precision.mean(),'recall':stats.SVC.recall.mean(),\
+         "fp_norm":stats.SVC.FP_norm.mean(),"fn_norm":stats.SVC.FN_norm.mean()}
+stats_dict= {}
+stats_dict["ET"]=et_stats
+stats_dict["SVC"]=svc_stats
+name= "hog_stats_%d.pickle" % NTrials
+fout = open(name, 'w') 
+pickle.dump(stats_dict, fout)
+fout.close()
+
+# fin=open('hog_stats_10.pickle',"r")
+# test=pickle.load(fin)
+# fin.close()

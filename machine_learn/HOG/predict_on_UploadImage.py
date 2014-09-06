@@ -23,7 +23,7 @@ def save_ImageOfHog(grey_img,ImageOfHog,rgb_img):
         axis.set_title(titles[cnt],fontdict={'fontsize':20.})
         [label.set_visible(False) for label in axis.get_xticklabels()]
         [label.set_visible(False) for label in axis.get_yticklabels()]
-    plt.savefig("tmp/image_of_hog.png",dpi=200)
+    plt.savefig("tmp/image_of_hog.png",bbox_inches='tight')
 
 def CalcHog_FeaturesAndImage_ForOneImage(grey_img,image_name,rgb_img):
     feat = zeros((1,900)) #People_All_9.csv Food_All_9.csv
@@ -42,6 +42,12 @@ def CalcHog_FeaturesAndImage_ForOneImage(grey_img,image_name,rgb_img):
     final_df.to_csv("tmp/HogFeatures.csv")
     
     save_ImageOfHog(grey_img,ImageOfHog,rgb_img)
+
+def interpret_int_predict(int_predict):
+    food_code=0
+    people_code=1
+    if int_predict == food_code: return "Contains: Food"
+    else: return "Contains: People"
 
 def Hog_predict_UploadImage(grey_img,image_name,rgb_img):
     CalcHog_FeaturesAndImage_ForOneImage(grey_img,image_name,rgb_img)
@@ -78,4 +84,6 @@ def Hog_predict_UploadImage(grey_img,image_name,rgb_img):
 # obj = Image.open( cStringIO.StringIO(read) )
 # rgb_img= np.array(obj)
 # grey_img = np.array(obj.convert('L'))
-# Hog_predict_UploadImage(grey_img,file,rgb_img)
+# (et,svc)= Hog_predict_UploadImage(grey_img,file,rgb_img)
+#et_ans= interpret_int_predict(et[0].astype('int'))
+#svc_ans= interpret_int_predict(svc[0].astype('int'))

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <body>
+<!--         HOG Results -->
+        {% if hog_fig and hog_predict and hog_stats %} 
+            <h1>HOG image analysis:</h1>
+            <img src={{url_for('get_tmp_image_url',filename=hog_fig)}} width="600" height="200">
+            <h3>HOG predicts:</h3> 
+            ET: {{hog_predict[0]}} <br>
+            SVC: {{hog_predict[1]}}
+
+            <h3>HOG stats:</h3>
+            <p>ET: precision= {{hog_stats["ET"]["prec"]}}, recall= {{hog_stats["ET"]["recall"]}} 
+                fp_norm= {{hog_stats["ET"]["fp_norm"]}}, fn_norm= {{hog_stats["ET"]["fn_norm"]}}
+            </p>
+            <p>SVC: precision= {{hog_stats["SVC"]["prec"]}}, recall= {{hog_stats["SVC"]["recall"]}} 
+                fp_norm= {{hog_stats["SVC"]["fp_norm"]}}, fn_norm= {{hog_stats["SVC"]["fn_norm"]}}
+            </p>
+        {% endif %}
+        
+<!--         Blob Results -->
+        {% if blob_fig and blob_predict and blob_stats %} 
+            <h1>Blob image analysis:</h1>
+            <img src={{url_for('get_tmp_image_url',filename=blob_fig)}} width="400" height="1200">
+            <h3>Blob predicts:</h3> 
+            <p> blob_results.HasPeople= {{blob_predict}} </p>
+
+            <h3>Blob stats:</h3>
+            <p> Fraction Correct: {{blob_stats.frac_correct}} <br>
+                Precision: {{blob_stats.precision}} <br>
+                Recall: {{blob_stats.recall}} <br>
+                True Pos. (normalized): {{blob_stats.tp_norm}} <br>
+                False Pos. (normalized): {{blob_stats.fp_norm}}
+            </p>
+        {% endif %}
+    </body>
+</html>
