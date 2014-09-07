@@ -2,8 +2,99 @@
 {% block content %}
 <!-- extend base layout -->
 
-<!--         HOG Results -->
-        {% if hog_fig and hog_predict and hog_stats %} 
+    <h3>Uploaded: {{filename}}</h3>
+    <img src={{url_for('get_image_url',filename=filename)}} width="200" height="200">
+ 
+    <h3>User Sees:</h3>
+        <ul>
+            <li>{{WhatSee}}</li>
+        </ul>
+    
+    <ol>
+        <li><h3>Blob method results</h3></li>
+            <ul>
+                <li><strong>Prediction:</strong></li>
+                    <ul>
+                        <li>HasPeople= {{blob_predict}}</li>
+                    </ul>
+                <li><strong>Stats:</strong></li>
+                    <ul>
+                        <li>Fraction Correct= {{blob_stats.frac_correct}}</li>
+                        <li>Precision: {{blob_stats.precision}}</li>
+                        <li>Recall: {{blob_stats.recall}}</li>
+                        <li>False Pos. (normalized): {{blob_stats.fp_norm}}</li>
+                        <li>True Pos. (normalized): {{blob_stats.tp_norm}}</li>
+                    </ul>
+            </ul>
+        <li><h3>HOG method results</h3></li>
+            <ol>
+                <li>ET</li>
+                    <ul>
+                        <li><strong>Prediction:</strong></li>
+                            <ul>
+                                <li>{{hog_predict[0]}}</li>
+                            </ul>
+                        <li><strong>Stats:</strong></li>
+                            <ul>
+                                <li>Precision: {{hog_stats["ET"]["prec"]}}</li>
+                                <li>Recall: {{hog_stats["ET"]["recall"]}}</li>
+                                <li>False Pos. (normalized): {{hog_stats["ET"]["fp_norm"]}}</li>
+                                <li>False Neg. (normalized): {{hog_stats["ET"]["fn_norm"]}}</li>
+                            </ul>
+                    </ul>
+                <li>Linear SVC</li>
+                    <ul>
+                        <li><strong>Prediction:</strong></li>
+                            <ul>
+                                <li>{{hog_predict[1]}}</li>
+                            </ul>
+                        <li><strong>Stats:</strong></li>
+                            <ul>
+                                <li>Precision: {{hog_stats["SVC"]["prec"]}}</li>
+                                <li>Recall: {{hog_stats["SVC"]["recall"]}}</li>
+                                <li>False Pos. (normalized): {{hog_stats["SVC"]["fp_norm"]}}</li>
+                                <li>False Neg. (normalized): {{hog_stats["SVC"]["fn_norm"]}}</li>
+                            </ul>
+                    </ul>
+            </ol>
+        <li><h3>Blob features explained...</h3></li>
+            <p>The following images show different kinds of "Blobs" identified by the classifier. "Blobs" are connected regions of "skin color" pixels. Images are flagged to contain peoples' faces, hands, limbs, etc. based on whether any "Blobs" are likely to be those people's faces and limbs.</p>
+            <img src={{url_for('get_tmp_image_url',filename=blob_fig)}} width="300" height="900">
+            <ul>
+                <li><strong>SkinPixels: </strong>"human skin" color pixels are white. Image made by converted RGB pixel values into a color space that is supposed to distinguish between "human skin" and "other" colors. Doing this for 5 different such color spaces, and treating "human skin" as pixels identified as "human skin" by at least 4 out of 5 color spacees. 
+                </li>
+                <li><strong>Blobs: </strong> contiguous regions found by "scipy.ndimage.measurements.label()" color coded by largest (yellow/red) and smallest (blue/dark blue)
+                </li>
+                <li><strong>Blobs_GrMinArea: </strong> Remove blobs with total number of pixels < 100 (hard coded value)
+                </li>
+                <li><strong>Blobs_GrUserFloor: </strong> Remove all blobs EXCEPT those with number of pixels > 0.5% of the total number of pixels in the image
+                </li>
+                <li><strong>Blobs_wSkinFilledGrFloor: </strong> Keep blobs that contain the most "holes", specifically blobs with at least 15% of the pixels they contains are holes. A "hole" is a non-human-skin pixel that is completely enclosed on all sides by human-skin pixels.
+                </li>
+                <li><strong>Blobs_wSmallHorizVertLines: </strong> Convert all "holes" in each blob to human-pixels, then remove blobs that have > 30% of their pixels flagged as being part of either horizontal or vertical lines. Done using "skimage.filter.vsobel()" and "skimage.filter.hsobel()".
+                </li>   
+                <li><strong>Blobs_wConvexHullAreaGrFloor: </strong> Convert all "holes" in each blob to human-pixels, then draw a Convex Hull around each blob. Keep blobs that occupy > 50% of their convex hulls. Use "skimage.filter.sobel" to draw convex hull.
+                </li>
+            </ul>
+            <p>For each <em>feature image</em> below, extracted features are: the Number of Blobs and the Percent of total image area the blobs occupy
+            </p>
+            
+        <li><h3>HOG features explained...</h3></li>
+            <p>Histogram of Oriented Gradients (HOG) uses "skimage.feature.hog()" to calculate a vector at every pixel with magnitude and direction of the local intensity gradient in neighboring pixels.</p>
+            <img src={{url_for('get_tmp_image_url',filename=hog_fig)}} width="600" height="200">
+    </ol>
+
+    <form id="upload_blob_hog_results" action="/upload_process/blob_hog_results" method="post">
+        <h1>Play Again?</h1>
+        <input type="submit" name="submit" value="restart">
+    </form>
+
+
+     <!-- 
+   <li>
+        <li><h3>Blob Method finds:</h3></li>
+    </ol>
+<!~~ Hog Results ~~>
             <h1>HOG image analysis:</h1>
             <img src={{url_for('get_tmp_image_url',filename=hog_fig)}} width="600" height="200">
             <h3>HOG predicts:</h3> 
@@ -17,9 +108,8 @@
             <p>SVC: precision= {{hog_stats["SVC"]["prec"]}}, recall= {{hog_stats["SVC"]["recall"]}} 
                 fp_norm= {{hog_stats["SVC"]["fp_norm"]}}, fn_norm= {{hog_stats["SVC"]["fn_norm"]}}
             </p>
-        {% endif %}
         
-<!--         Blob Results -->
+<!~~  Blob Results ~~>
         {% if blob_fig and blob_predict and blob_stats %} 
             <h1>Blob Features extracted:</h1> Number of Blobs and the Percent of total image area they occupy
             <img src={{url_for('get_tmp_image_url',filename=blob_fig)}} width="400" height="1200">
@@ -51,11 +141,7 @@
                 False Pos. (normalized): {{blob_stats.fp_norm}}
             </p>
         {% endif %}
-
-    <form id="upload_blob_hog_results" action="/upload_process/blob_hog_results" method="post">
-        <h1>Play Again?</h1>
-        <input type="submit" name="submit" value="restart">
-    </form>
+ -->
 
 <!-- extend base layout -->
 {% endblock %}

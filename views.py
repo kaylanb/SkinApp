@@ -24,40 +24,6 @@ from random import randrange
 app = Flask(__name__)
 app.config.from_object('config')
 
-# class Click2Play(Form):
-#     type=TextField('Anything', validators = [Required()])
-#     play= SubmitField("Click2Play")
-# 
-# class getWhatUserSees(Form):
-#     UserSees = TextField('UserSees', validators = [Required()])
-#     test= TextAreaField("test",validators= [Optional()])
-#     MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
-#    
-# class SelectOption(Form):
-#     choices= [("1","Use Test Image"),('2','Upload my own image')]
-#     HowAnalyze= SelectField("HowAnalyze",choices=choices)
-#     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
-#     WhichMethods= SelectMultipleField("Which Methods",choices=choices)
-# 
-# class UploadAnalyze(Form):
-#     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
-#     HowAnalyze= SelectField("HowAnalyze",choices=choices)
-
-# def do_ML():
-#     import  machine_learn as ml
-#     (ans,predict,url) = ml.run()
-#     try: 
-#         f=open("tmp/ml_results.csv","r")
-#         flash("results.csv already exists")
-#     except IOError:
-#         #if get here, file does not exist
-#         df= DataFrame()
-#         df["ans"]=ans
-#         df["predict"]=predict
-#         df["url"]=url
-#         df.to_csv("tmp/ml_results.csv",index=True)
-#         flash("output results.csv")
-
 @app.route('/', methods=['GET','POST'])
 # @app.route('/index', methods = ['GET', 'POST'])
 def index():
@@ -67,19 +33,6 @@ def index():
 def AboutUs():
     return render_template('AboutUs.html')
 
-# @app.route('/AnalyzeImg', methods = ['GET', 'POST'])
-# def AnalyzeImg():
-#     form= getWhatUserSees()
-#     path="training_image_urls/"
-#     urlFile= "NewTraining_Food_everyones.txt"
-#     urls = np.loadtxt(path+ urlFile, dtype="str")
-#     if form.validate_on_submit():
-#         flash("HERE I AM")
-#         flash('User Sees: %s, test= %s' % \
-#             (form.UserSees.data))
-#         return redirect('/ML')#,img_url=urls[0])
-#     return render_template('AnalyzeImg.html',
-#         title = 'AnalyzeImg',urls=urls,form=form)
 
 #save stuff to tmp/ directory as .pickle file so can be loaded as necessary later
 def save_to_tmp(obj,save_name):
@@ -145,27 +98,7 @@ def ShowTestData():
     return render_template('show_user_test_data.html',\
                     url=url)
 
-
-
-# @app.route('/OutputResults', methods = ['GET', 'POST'])
-# def OutputResults():
-#     do_ML()
-
-
-# @app.route('/ML', methods = ['GET', 'POST'])#img_url=image_url)
-# def ML():
-#     f=open("tmp/blob.txt","r")
-#     blob_txt= f.read()
-#     f.close()
-#     f=open("tmp/hog.txt","r")
-#     hog_txt= f.read()
-#     f.close()
-# #     urls=request.args.get('urls')
-# #     flash(urls[0] )
-#     #fig out how pass: UserSaw=form.UserSees.data and image_url into this function!\
-#     return render_template('ML.html',title = 'ML Results', \
-#             blob_image_results="tmp/blob.png",blob_text_results=blob_txt, \
-#             hog_image_results="tmp/hog.png",hog_text_results=hog_txt)
+##Upload image code:
 
 #upload directory
 app.config['UPLOAD_FOLDER'] = 'uploads/'
@@ -227,7 +160,8 @@ def upload_blob_hog_results():
         blob_stats= BF.BlobMethod_on_Image(image,file)
         blob_fig= "BlobFeaturesPlot.png"
         #load html with both Hog and Blob vars
-        return render_template('hog_blob_results.html',\
+        return render_template('hog_blob_results.html',filename=filename,\
+    WhatSee=request.form["WhatSee"],\
     hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
     blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
     else: return "got here by error!"
@@ -246,94 +180,8 @@ def get_tmp_image_url(filename):
     '''gets called from html files, with tag <img src={{}}'''
     return send_from_directory('tmp/',filename)
 
-# #pure html to show uploaded image and html for for user select how analyze image
-# @app.route('/upload/analyze',methods=['GET','POST'])
-# @app.route('/upload/analyze/<filename>',methods=['GET','POST'])
-# def upload_analyze(filename):
-# #     if request.method == 'POST':
-# #         return "hello"
-# #         username= request.form.username
-# #         return redirect( url_for('get_image_url',filename=filename) )
-#     print "filename= %s" % filename
-#     return render_template('upload.html',filename=filename)
-# 
-# @app.route('/upload/analyze_CalcStuff',methods=['GET','POST'])
-# def upload_analyze_CalcStuff():
-#     if request.method == 'POST':
-#         print request.form.keys()
-#         for key, val in request.form.iteritems():
-#             print key, val
-#         if request.form['HowAnalyze'] == "Blob":
-#             return redirect( url_for('Blob_results',filename=request.form["filename"]))
-#         elif request.form['HowAnalyze'] == "HOG":
-#             return redirect( url_for('Hog_results',filename=request.form["filename"]))
-#         else: 
-#             return redirect( url_for('Blob_Hog_results',filename=request.form["filename"]))
-# 
-# 
-# 
-# # @app.route('/upload/analyze/ML')
-# @app.route('/upload/analyze/Blob_results/<filename>')
-# def Blob_results(filename):
-#     #insert if, elif, else to show appropriate html file depending if HOG, Blob, or bothredirect to html first, print loading, then call functions then call html again but with results
-#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#     image= mpimg.imread(file)
-#     import Blob_Features as BF
-#     blob_stats= BF.BlobMethod_on_Image(image,file)
-#     blob_fig= "BlobFeaturesPlot.png"
-#     # print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
-# #     (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
-#     return render_template('hog_blob_results.html',\
-#             blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
-# 
-# @app.route('/upload/analyze/Hog_results/<filename>')
-# def Hog_results(filename):
-#     #load image into array
-#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#     obj = Image.open( file )
-#     rgb_img= np.array(obj)
-#     grey_img = np.array(obj.convert('L'))
-#     #hog ML
-#     sys.path.append('machine_learn/HOG/')
-#     import predict_on_UploadImage as HogML
-#     (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
-#     et_ans= HogML.interpret_int_predict(et[0].astype('int'))
-#     svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
-#     hog_fig="image_of_hog.png"
-#     #get hog stats
-#     fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
-#     hog_stats=pickle.load(fin)
-#     fin.close()
-#     return render_template('hog_blob_results.html',\
-#             hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats)
-#     
-# @app.route('/upload/analyze/Blob_Hog_results/<filename>')
-# def Blob_Hog_results(filename):
-#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-#     #HOG
-#     obj = Image.open( file )
-#     rgb_img= np.array(obj)
-#     grey_img = np.array(obj.convert('L'))
-#     sys.path.append('machine_learn/HOG/')
-#     import predict_on_UploadImage as HogML
-#     (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
-#     et_ans= HogML.interpret_int_predict(et[0].astype('int'))
-#     svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
-#     hog_fig="image_of_hog.png"
-#     fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
-#     hog_stats=pickle.load(fin)
-#     fin.close()
-#     #BLOB
-#     image= mpimg.imread(file)
-#     import Blob_Features as BF
-#     blob_stats= BF.BlobMethod_on_Image(image,file)
-#     blob_fig= "BlobFeaturesPlot.png"
-#     #load html with both Hog and Blob vars
-#     return render_template('hog_blob_results.html',\
-#             hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
-#             blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
 
-#######################
+##### main
     
 if __name__ == '__main__':
     app.run(debug=True)
