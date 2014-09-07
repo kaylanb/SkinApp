@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- extend base layout -->
+
+    <h1>Here is a random image from our Food/Faces Test data set {{filename}}</h1>
+    <img src={{url}} width="200" height="200">
+    
+    <ul>
+        <li><h3>User Sees:</h3></li>
+            <ul>
+                <li>{{WhatSee}}</li>
+            </ul>
+        <li><h3>Answer is supposed to be:</h3></li>
+            <ul>
+                <li>{{ans_pred_d["ans"]}}</li>
+            </ul>
+        <li><h3>Blob Method finds:</h3></li>
+            <ol>
+                <li><strong>Prediction:</strong></li>
+                    <ul>
+                        <li>{{ans_pred_d["blob_pred"]}}</li>
+                    </ul>
+                <li><strong>Stats:</strong></li>
+                    <ul>
+                        <li>Fraction Correct= {{blob_stats['frac_corr']}}</li>
+                        <li>Precision: {{blob_stats['prec']}}</li>
+                        <li>Recall: {{blob_stats['rec']}}</li>
+                        <li>False Pos. (normalized): {{blob_stats['fp_norm']}}</li>
+                        <li>False Neg. (normalized): {{blob_stats['fn_norm']}}</li>
+                    </ul>
+            </ol>
+        <li><h3>HOG Method finds:</h3></li>
+            <ul>
+                <li>ET</li>
+                    <ol>
+                        <li><strong>Prediction:</strong></li>
+                            <ul>
+                                <li>{{ans_pred_d["hog_pred_et"]}}</li>
+                            </ul>
+                        <li><strong>Stats:</strong></li>
+                            <ul>
+                                <li>Precision: {{hog_stats["ET"]["prec"]}}</li>
+                                <li>Recall: {{hog_stats["ET"]["recall"]}}</li>
+                                <li>False Pos. (normalized): {{hog_stats["ET"]["fp_norm"]}}</li>
+                                <li>False Neg. (normalized): {{hog_stats["ET"]["fn_norm"]}}</li>
+                            </ul>
+                    </ol>
+                <li>Linear SVC</li>
+                    <ol>
+                        <li><strong>Prediction:</strong></li>
+                            <ul>
+                                <li>{{ans_pred_d["hog_pred_svc"]}}</li>
+                            </ul>
+                        <li><strong>Stats:</strong></li>
+                            <ul>
+                                <li>Precision: {{hog_stats["SVC"]["prec"]}}</li>
+                                <li>Recall: {{hog_stats["SVC"]["recall"]}}</li>
+                                <li>False Pos. (normalized): {{hog_stats["SVC"]["fp_norm"]}}</li>
+                                <li>False Neg. (normalized): {{hog_stats["SVC"]["fn_norm"]}}</li>
+                            </ul>
+                    </ol>
+            </ul>
+    </ul>
+
+    <form id="ShowTestData" action="ShowTestData" method="post">
+        <h1>Play Again?</h1>
+        <input type="submit" name="submit" value="yes">
+    </form>
+
+<!-- extend base layout -->
+{% endblock %}
+ 

@@ -18,6 +18,7 @@ import matplotlib.image as mpimg
 from PIL import Image
 import sys
 import pickle
+from random import randrange
 
 
 app = Flask(__name__)
@@ -60,12 +61,11 @@ class SelectOption(Form):
 @app.route('/', methods=['GET','POST'])
 # @app.route('/index', methods = ['GET', 'POST'])
 def index():
-#     form= Click2Play()
-    form= SelectOption()
-    # if form.validate_on_submit():
-#         flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
-#         return redirect('/AnalyzeImg')
-    return render_template('index.html',title = 'Select Option',form=form)
+    return render_template('index.html')
+
+@app.route('/AboutUs')
+def AboutUs():
+    return render_template('AboutUs.html')
 
 # @app.route('/AnalyzeImg', methods = ['GET', 'POST'])
 # def AnalyzeImg():
@@ -98,13 +98,35 @@ def ShowTestData():
     c=a.intersection(b)
     common_urls=np.array(list(c))
     ####
-    # if form.validate_on_submit():
-#         flash("HERE I AM")
-#         flash('User Sees: %s, test= %s' % \
-#             (form.UserSees.data))
-#         return redirect('/ML')#,img_url=urls[0])
-    url=common_urls[0]
-    return render_template('show_test_data.html',\
+    rand_index= randrange(len(common_urls))
+    print "Above url set!? rand_index= %d" % rand_index
+    url=common_urls[ rand_index ]
+    if request.method == 'POST':  
+        #if here then user clicked output blob hog for image
+        if request.method == 'POST' and request.form["submit"]=="yes":  
+            #if here then user clicked do again for new image
+            return redirect('/ShowTestData') #url_for('upload_analyze'))
+            
+        #hog, blob prediction for url
+        ans_pred_d= {} 
+        index= np.where(blob_df.url == url)[0][0]
+        ans_pred_d["ans"]= blob_df.answer.values[index]
+        ans_pred_d["blob_pred"]=blob_df.predict.values[index]
+        index= np.where(hog_df.url == url)[0][0]
+        ans_pred_d["hog_pred_et"]= hog_df.ET_predict.values[index]
+        ans_pred_d["hog_pred_svc"]= hog_df.LinSVC_predict.values[index]
+        #blob stats
+        fin=open(root+'NoLims_shuffled_blob_stats.pickle')
+        blob_stats=pickle.load(fin)
+        fin.close()
+        #hog stats from 10 Trials through Train/Test set
+        fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+        hog_stats=pickle.load(fin)
+        fin.close()
+        return render_template('show_user_test_data_blob_hog.html',\
+                    url=url,WhatSee=request.form["WhatSee"],ans_pred_d=ans_pred_d,\
+                    blob_stats=blob_stats,hog_stats=hog_stats)
+    return render_template('show_user_test_data.html',\
                     url=url)
 
 

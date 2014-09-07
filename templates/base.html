@@ -1,4 +1,5 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
     {% if title %}
     <title>{{title}}</title>
@@ -8,20 +9,13 @@
   </head>
   <body>
     <div>Navigate Here: 
-        <a href="/index">Home</a>
-        <a href="/AnalyzeImg">AnalyzeImg</a>
-        <a href="/upload">UploadImg</a>
+        <a href="/">Home</a>
+        <a href="/ShowTestData">Show Test Data</a>
+        <a href="/upload">Upload Local Image</a>
+        <a href="/AboutUs">About Us</a>
     </div>
-    <hr>
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-    <ul>
-    {% for message in messages %}
-        <li>{{ message }} </li>
-    {% endfor %}
-    </ul>
-    {% endif %}
-    {% endwith %}
+ 
+<!--     leave below ALONE, this allows this html file to be used as template for others -->
     {% block content %}{% endblock %}
   </body>
 </html>
