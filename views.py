@@ -2,9 +2,9 @@ from flask import Flask
 from flask import render_template, flash, redirect
 import numpy as np
 #forms
-from flask.ext.wtf import Form
-from wtforms import TextField, SubmitField, TextAreaField, BooleanField, SelectField,SelectMultipleField
-from wtforms.validators import Required, Optional
+# from flask.ext.wtf import Form
+# from wtforms import TextField, SubmitField, TextAreaField, BooleanField, SelectField,SelectMultipleField
+# from wtforms.validators import Required, Optional
 #other
 from pandas import read_csv, DataFrame
 
@@ -192,11 +192,14 @@ def get_tmp_image_url(filename):
 ##### main
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
+#     app.run(debug=True)
      #   host="0.0.0.0",
      #   port=int("80"),
      #   debug=True
     # 
+    
 
 
 
