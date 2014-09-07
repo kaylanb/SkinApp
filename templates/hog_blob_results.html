@@ -21,8 +21,25 @@
         
 <!--         Blob Results -->
         {% if blob_fig and blob_predict and blob_stats %} 
-            <h1>Blob image analysis:</h1>
+            <h1>Blob Features extracted:</h1> Number of Blobs and the Percent of total image area they occupy
             <img src={{url_for('get_tmp_image_url',filename=blob_fig)}} width="400" height="1200">
+            <h3>Description of Blob Features above</h3>
+                <ol>
+                    <li><strong>SkinPixels: </strong>"human skin" color pixels are white. Image made by converted RGB pixel values into a color space that is supposed to distinguish between "human skin" and "other" colors. Doing this for 5 different such color spaces, and treating "human skin" as pixels identified as "human skin" by at least 4 out of 5 color spacees. 
+                    </li>
+                    <li><strong>Blobs: </strong> contiguous regions found by "scipy.ndimage.measurements.label()" color coded by largest (yellow/red) and smallest (blue/dark blue)
+                    </li>
+                    <li><strong>Blobs_GrMinArea: </strong> Remove blobs with total number of pixels < 100 (hard coded value)
+                    </li>
+                    <li><strong>Blobs_GrUserFloor: </strong> Remove all blobs EXCEPT those with number of pixels > 0.5% of the total number of pixels in the image
+                    </li>
+                    <li><strong>Blobs_wSkinFilledGrFloor: </strong> Keep blobs that contain the most "holes", specifically blobs with at least 15% of the pixels they contains are holes. A "hole" is a non-human-skin pixel that is completely enclosed on all sides by human-skin pixels.
+                    </li>
+                    <li><strong>Blobs_wSmallHorizVertLines: </strong> Convert all "holes" in each blob to human-pixels, then remove blobs that have > 30% of their pixels flagged as being part of either horizontal or vertical lines. Done using "skimage.filter.vsobel()" and "skimage.filter.hsobel()".
+                    </li>   
+                    <li><strong>Blobs_wConvexHullAreaGrFloor: </strong> Convert all "holes" in each blob to human-pixels, then draw a Convex Hull around each blob. Keep blobs that occupy > 50% of their convex hulls. Use "skimage.filter.sobel" to draw convex hull.
+                    </li>
+                </ol>
             <h3>Blob predicts:</h3> 
             <p> blob_results.HasPeople= {{blob_predict}} </p>
 
