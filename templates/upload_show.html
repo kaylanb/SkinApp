@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block content %}
+<!-- extend base layout -->
+
+    <h1>Uploaded: {{filename}}</h1>
+    <img src={{url_for('get_image_url',filename=filename)}} width="200" height="200">
+
+    <form id="upload_blob_hog_results" action="/upload_process/blob_hog_results" method="post">
+        <h3>Select what you see in the image or <em>Choose the description that is closest to what you would say</em></h3>
+            <p><input type="radio" name="WhatSee" value="food">Food but no people's faces or hands, arms, limbs, etc.</p>
+            <p><input type="radio" name="WhatSee" value="people">people's faces or hands, arms, limbs, etc</p>
+        <h3>Click below when done</h3>
+        <input type="submit" name="submit" value="Analyze with Blob and Hog methods">
+    </form>
+
+<!-- extend base layout -->
+{% endblock %}
+ 

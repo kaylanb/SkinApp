@@ -33,11 +33,11 @@ app.config.from_object('config')
 #     test= TextAreaField("test",validators= [Optional()])
 #     MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
 #    
-class SelectOption(Form):
-    choices= [("1","Use Test Image"),('2','Upload my own image')]
-    HowAnalyze= SelectField("HowAnalyze",choices=choices)
-    choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
-    WhichMethods= SelectMultipleField("Which Methods",choices=choices)
+# class SelectOption(Form):
+#     choices= [("1","Use Test Image"),('2','Upload my own image')]
+#     HowAnalyze= SelectField("HowAnalyze",choices=choices)
+#     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
+#     WhichMethods= SelectMultipleField("Which Methods",choices=choices)
 # 
 # class UploadAnalyze(Form):
 #     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
@@ -167,10 +167,9 @@ def ShowTestData():
 #             blob_image_results="tmp/blob.png",blob_text_results=blob_txt, \
 #             hog_image_results="tmp/hog.png",hog_text_results=hog_txt)
 
-#################### upload file code
-# This is the path to the upload directory
+#upload directory
 app.config['UPLOAD_FOLDER'] = 'uploads/'
-# These are the extension that we are accepting to be uploaded
+# extensions allowed for uploaded image
 app.config['ALLOWED_EXTENSIONS'] = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
 # For a given file, return whether it's an allowed type or not
@@ -196,119 +195,143 @@ def upload_process():
         # the upload folder we setup
         saved_at=os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(saved_at)
-        # Redirect the user to the uploaded_file route, which
-        # will basicaly show on the browser the uploaded file
-#         args={}
-#         args["filename"]=filename
-#         args["saved_at"]=saved_at
-        return redirect( url_for('upload_analyze',filename=filename))#,saved_at) )
+        #show the file and ask for what user sees
+        save_to_tmp(filename,"upload_filename.pickle")
+        return render_template('upload_show.html',filename=filename) 
 
-#if call "url_for('get_image_url',arg1=arg1,...,argN=argN)", must have "@app.route('/get_image_url/<argN>') decorator for each argument argN
+@app.route('/upload_process/blob_hog_results', methods=['POST'])
+def upload_blob_hog_results():
+    if request.method == 'POST':  
+        #if here then user entered what saw
+        if request.method == 'POST' and request.form["submit"]=="restart":  
+            #if here then user said do again for new image
+            return redirect('/upload') #url_for('upload_analyze'))
+        filename= load_from_tmp("upload_filename.pickle")
+        file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        #HOG
+        obj = Image.open( file )
+        rgb_img= np.array(obj)
+        grey_img = np.array(obj.convert('L'))
+        sys.path.append('machine_learn/HOG/')
+        import predict_on_UploadImage as HogML
+        (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
+        et_ans= HogML.interpret_int_predict(et[0].astype('int'))
+        svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
+        hog_fig="image_of_hog.png"
+        fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+        hog_stats=pickle.load(fin)
+        fin.close()
+        #BLOB
+        image= mpimg.imread(file)
+        import Blob_Features as BF
+        blob_stats= BF.BlobMethod_on_Image(image,file)
+        blob_fig= "BlobFeaturesPlot.png"
+        #load html with both Hog and Blob vars
+        return render_template('hog_blob_results.html',\
+    hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
+    blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
+    else: return "got here by error!"
+       
+#return path to images in /uploads
 @app.route('/get_image_url')
 @app.route('/get_image_url/<filename>')
 def get_image_url(filename):
     '''for use in <somefile>.html, so can call <img src={{ url_for('upload_send_image_url',filename=filename }}>'''
     return send_from_directory(app.config['UPLOAD_FOLDER'],filename)
-#     return send_from_directory(app.config['UPLOAD_FOLDER'],
-#                                "engage_1ps.jpg")
 
-# class HowAnalyze(Form):
-#     choices= [("1","Blob"),('2','HOG'),('3',"Blob and HOG")]
-#     func= SelectMultipleField("HowAnalyze",choices=choices)
-#     choices= [('1','basic'),('2','detailed')]
-#     output= SelectField("what output",choices=choices)
-
-
-#pure html to show uploaded image and html for for user select how analyze image
-@app.route('/upload/analyze',methods=['GET','POST'])
-@app.route('/upload/analyze/<filename>',methods=['GET','POST'])
-def upload_analyze(filename):
-#     if request.method == 'POST':
-#         return "hello"
-#         username= request.form.username
-#         return redirect( url_for('get_image_url',filename=filename) )
-    print "filename= %s" % filename
-    return render_template('upload.html',filename=filename)
-
-@app.route('/upload/analyze_CalcStuff',methods=['GET','POST'])
-def upload_analyze_CalcStuff():
-    if request.method == 'POST':
-        print request.form.keys()
-        for key, val in request.form.iteritems():
-            print key, val
-        if request.form['HowAnalyze'] == "Blob":
-            return redirect( url_for('Blob_results',filename=request.form["filename"]))
-        elif request.form['HowAnalyze'] == "HOG":
-            return redirect( url_for('Hog_results',filename=request.form["filename"]))
-        else: 
-            return redirect( url_for('Blob_Hog_results',filename=request.form["filename"]))
-
+#return path to images in /tmp
 @app.route('/get_tmp_image_url')
 @app.route('/get_tmp_image_url/<filename>')
 def get_tmp_image_url(filename):
     '''gets called from html files, with tag <img src={{}}'''
     return send_from_directory('tmp/',filename)
 
-# @app.route('/upload/analyze/ML')
-@app.route('/upload/analyze/Blob_results/<filename>')
-def Blob_results(filename):
-    #insert if, elif, else to show appropriate html file depending if HOG, Blob, or bothredirect to html first, print loading, then call functions then call html again but with results
-    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    image= mpimg.imread(file)
-    import Blob_Features as BF
-    blob_stats= BF.BlobMethod_on_Image(image,file)
-    blob_fig= "BlobFeaturesPlot.png"
-    # print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
-#     (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
-    return render_template('hog_blob_results.html',\
-            blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
-
-@app.route('/upload/analyze/Hog_results/<filename>')
-def Hog_results(filename):
-    #load image into array
-    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    obj = Image.open( file )
-    rgb_img= np.array(obj)
-    grey_img = np.array(obj.convert('L'))
-    #hog ML
-    sys.path.append('machine_learn/HOG/')
-    import predict_on_UploadImage as HogML
-    (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
-    et_ans= HogML.interpret_int_predict(et[0].astype('int'))
-    svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
-    hog_fig="image_of_hog.png"
-    #get hog stats
-    fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
-    hog_stats=pickle.load(fin)
-    fin.close()
-    return render_template('hog_blob_results.html',\
-            hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats)
-    
-@app.route('/upload/analyze/Blob_Hog_results/<filename>')
-def Blob_Hog_results(filename):
-    file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
-    #HOG
-    obj = Image.open( file )
-    rgb_img= np.array(obj)
-    grey_img = np.array(obj.convert('L'))
-    sys.path.append('machine_learn/HOG/')
-    import predict_on_UploadImage as HogML
-    (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
-    et_ans= HogML.interpret_int_predict(et[0].astype('int'))
-    svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
-    hog_fig="image_of_hog.png"
-    fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
-    hog_stats=pickle.load(fin)
-    fin.close()
-    #BLOB
-    image= mpimg.imread(file)
-    import Blob_Features as BF
-    blob_stats= BF.BlobMethod_on_Image(image,file)
-    blob_fig= "BlobFeaturesPlot.png"
-    #load html with both Hog and Blob vars
-    return render_template('hog_blob_results.html',\
-            hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
-            blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
+# #pure html to show uploaded image and html for for user select how analyze image
+# @app.route('/upload/analyze',methods=['GET','POST'])
+# @app.route('/upload/analyze/<filename>',methods=['GET','POST'])
+# def upload_analyze(filename):
+# #     if request.method == 'POST':
+# #         return "hello"
+# #         username= request.form.username
+# #         return redirect( url_for('get_image_url',filename=filename) )
+#     print "filename= %s" % filename
+#     return render_template('upload.html',filename=filename)
+# 
+# @app.route('/upload/analyze_CalcStuff',methods=['GET','POST'])
+# def upload_analyze_CalcStuff():
+#     if request.method == 'POST':
+#         print request.form.keys()
+#         for key, val in request.form.iteritems():
+#             print key, val
+#         if request.form['HowAnalyze'] == "Blob":
+#             return redirect( url_for('Blob_results',filename=request.form["filename"]))
+#         elif request.form['HowAnalyze'] == "HOG":
+#             return redirect( url_for('Hog_results',filename=request.form["filename"]))
+#         else: 
+#             return redirect( url_for('Blob_Hog_results',filename=request.form["filename"]))
+# 
+# 
+# 
+# # @app.route('/upload/analyze/ML')
+# @app.route('/upload/analyze/Blob_results/<filename>')
+# def Blob_results(filename):
+#     #insert if, elif, else to show appropriate html file depending if HOG, Blob, or bothredirect to html first, print loading, then call functions then call html again but with results
+#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#     image= mpimg.imread(file)
+#     import Blob_Features as BF
+#     blob_stats= BF.BlobMethod_on_Image(image,file)
+#     blob_fig= "BlobFeaturesPlot.png"
+#     # print "blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm %s %f %f %f %f %f" % \
+# #     (blob_results.HasPeople, blob_results.frac_correct, blob_results.precision, blob_results.recall, blob_results.tp_norm, blob_results.fp_norm)
+#     return render_template('hog_blob_results.html',\
+#             blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
+# 
+# @app.route('/upload/analyze/Hog_results/<filename>')
+# def Hog_results(filename):
+#     #load image into array
+#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#     obj = Image.open( file )
+#     rgb_img= np.array(obj)
+#     grey_img = np.array(obj.convert('L'))
+#     #hog ML
+#     sys.path.append('machine_learn/HOG/')
+#     import predict_on_UploadImage as HogML
+#     (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
+#     et_ans= HogML.interpret_int_predict(et[0].astype('int'))
+#     svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
+#     hog_fig="image_of_hog.png"
+#     #get hog stats
+#     fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+#     hog_stats=pickle.load(fin)
+#     fin.close()
+#     return render_template('hog_blob_results.html',\
+#             hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats)
+#     
+# @app.route('/upload/analyze/Blob_Hog_results/<filename>')
+# def Blob_Hog_results(filename):
+#     file=os.path.join(app.config['UPLOAD_FOLDER'], filename)
+#     #HOG
+#     obj = Image.open( file )
+#     rgb_img= np.array(obj)
+#     grey_img = np.array(obj.convert('L'))
+#     sys.path.append('machine_learn/HOG/')
+#     import predict_on_UploadImage as HogML
+#     (et,svc)=HogML.Hog_predict_UploadImage(grey_img,file,rgb_img)
+#     et_ans= HogML.interpret_int_predict(et[0].astype('int'))
+#     svc_ans= HogML.interpret_int_predict(svc[0].astype('int'))
+#     hog_fig="image_of_hog.png"
+#     fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
+#     hog_stats=pickle.load(fin)
+#     fin.close()
+#     #BLOB
+#     image= mpimg.imread(file)
+#     import Blob_Features as BF
+#     blob_stats= BF.BlobMethod_on_Image(image,file)
+#     blob_fig= "BlobFeaturesPlot.png"
+#     #load html with both Hog and Blob vars
+#     return render_template('hog_blob_results.html',\
+#             hog_fig=hog_fig,hog_predict=[et_ans,svc_ans],hog_stats=hog_stats,\
+#             blob_fig=blob_fig,blob_predict=blob_stats.HasPeople,blob_stats=blob_stats)
 
 #######################
     
