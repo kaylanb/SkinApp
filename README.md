@@ -26,10 +26,11 @@ Code and inspiration pulled from the following sources:
     * You select what you see in the image, hit the "analyze" button, and the HOG/Blob results are output.
     * To keep doing this for new images, hit the "yes" button at bottom
 * Click on "Upload_Local_Image"
-* * Upload an image from you computer, select what you see in the image, hit "analyze" button
-* * WAIT for ~ 10-20 sec, it runs the trained HOG and Blob classifiers on your image so takes a bit, then HOG and Blob results output, and additional info for how each classifier works
+    * Upload an image from you computer, select what you see in the image, hit "analyze" button
+    * WAIT for ~ 10-20 sec, it runs the trained HOG and Blob classifiers on your image so takes a bit, then HOG and Blob results output, and additional info for how each classifier works
 
 ###Next Steps
+
 * Add text describing the project, how the classifiers work, about us, links to github, etc.
 * Think of how turn into game. Maybe show histogram "live" of how many correct HOG classifier gets correct versus Blob classifier versus User
 * CSS files to make it look awesome
