@@ -49,6 +49,13 @@ def load_from_tmp(f_name):
     fin.close()
     return obj
 
+#convert prediction integer to meaningful string: 0 -> food, 1 -> people
+def int_predict(int_predict):
+    food_code=0
+    people_code=1
+    if int_predict == food_code: return "Food"
+    else: return "People"
+
 @app.route('/ShowTestData', methods = ['GET', 'POST'])
 def ShowTestData():
     #get urls of test images, and urls that hog and blob predict have in common
@@ -74,11 +81,11 @@ def ShowTestData():
         #hog, blob prediction for url
         ans_pred_d= {} 
         index= np.where(blob_df.url == url)[0][0]
-        ans_pred_d["ans"]= blob_df.answer.values[index]
-        ans_pred_d["blob_pred"]=blob_df.predict.values[index]
+        ans_pred_d["ans"]= int_predict( blob_df.answer.values[index].astype('int') )
+        ans_pred_d["blob_pred"]= int_predict( blob_df.predict.values[index].astype('int') )
         index= np.where(hog_df.url == url)[0][0]
-        ans_pred_d["hog_pred_et"]= hog_df.ET_predict.values[index]
-        ans_pred_d["hog_pred_svc"]= hog_df.LinSVC_predict.values[index]
+        ans_pred_d["hog_pred_et"]= int_predict(hog_df.ET_predict.values[index].astype('int'))
+        ans_pred_d["hog_pred_svc"]= int_predict(hog_df.LinSVC_predict.values[index].astype('int'))
         #blob stats
         fin=open(root+'NoLims_shuffled_blob_stats.pickle')
         blob_stats=pickle.load(fin)
@@ -87,6 +94,7 @@ def ShowTestData():
         fin=open('machine_learn/HOG/hog_stats_10.pickle',"r")
         hog_stats=pickle.load(fin)
         fin.close()
+        print "answer type is: ", type(ans_pred_d["ans"])
         return render_template('show_user_test_data_blob_hog.html',\
                     url=url,WhatSee=request.form["WhatSee"],ans_pred_d=ans_pred_d,\
                     blob_stats=blob_stats,hog_stats=hog_stats)

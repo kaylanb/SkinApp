@@ -1,6 +1,31 @@
 <!-- extend base layout -->
 {% extends "base.html" %}
-
 {% block content %}
-<h1>Welcome to our website</h1>
+
+<h1>Welcome to the Skin vs. Food Web App!</h1>
+
+<h3>Instructions</h3>
+<ol>
+    <li>Click on the 4 Links at the top to navigate around</li>
+    <li>Click on "Show_Test_Data"</li>
+        <ol>
+            <li>This shows 1 of 200 images (selected randomly) from our Test Data Set. Both "HOG" and "Blob" classifiers were trained on the same 300 image Training Data Set.</li>
+            <li>You select what you see in the image, hit the "analyze" button, and the HOG/Blob results are output.</li>
+            <li>To keep doing this for new images, hit the "yes" button at bottom</li>
+        </ol>
+    <li>Click on "Upload_Local_Image"</li>
+        <ol>
+            <li>Upload an image from you computer, select what you see in the image, hit "analyze" button</li>
+            <li>WAIT for ~ 10-20 sec, it runs the trained HOG and Blob classifiers on your image so takes a bit, then HOG and Blob results output, and additional info for how each classifier works </li>
+        </ol>
+</ol>
+
+<h3>Next Steps</h3>
+<ol>
+    <li>Add text describing the project, how the classifiers work, about us, links to github, etc.</li>
+    <li>Think of how turn into game. Maybe show histogram "live" of how many correct HOG classifier gets correct versus Blob classifier versus User </li>
+    <li>CSS files to make it look awesome</li>
+</ol>
+
+<!-- extend base layout -->
 {% endblock %}

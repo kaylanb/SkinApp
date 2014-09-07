@@ -1,16 +1,40 @@
-Must Do steps for app:
-1. 1st Functionality of Web App: user is shown image from Test Set (can hit button to go to another image if desired), says whether has People or Food in it, hits submit, learned RandForest predictsfor ALL Test set images, outputs what it thinks was in the specific image user saw AND precision,recall for entire Test set it ran on
-    -- problems installing scipy, so will just put Test Set 3 colum output in tmp/ so no 1st butt for now
-	-- for user interface have 4 buttons, 1st butt: runs ML on Test set and outputs 3 colm text file: prediction, answer, url, 2nd butt: checks whether that file exists and if so reads it in and outputs results, 3rd butt: calls function that calcs all Blob features and plots them on one subplot saves subplot and subplot is shown to user, 4th butt: same as 3rd but for HOG
-2. 2nd Functionality: same as 1st Functionality, but user uploads their own rgb image from local machine and same info entered and returned
-3. get working on heroku
-4. email sudeep & team link to website for comments and say next steps... 
-5. Add "about" html sections for the project, the Blob and HOG methods, intended use, needed/future work, acknowledgements
-6. allow for random ordering when constructing TrainX,TestX,TrainY,TestY
-    -- for now (8/24/14), for simplicity, I am NOT RANDOM ORDERING TrainX and TestX data sets, instead TrainX is the first half of the Food rows (features) concatenated with the first half of People rows (features), TestX is the same but using second half of rows, and TextY and TrainY are all 0's for Food and all 1's for People concatenated in same way
+#Welcome to the Skin vs. Food Web App!
 
-Upload File code modified from: http://www.runnable.com/
-setup(name='Uploading', version='1.0',
-      description='Code example demonstrating how to upload a file using Flask',
-      author='Miguel Molina', author_email='info@runnable.com',
-      url='http://www.runnable.com/')
+### Team Members
+
+* Kaylan Burleigh
+* Maurizio Pellegrino
+* C.Al Rive
+* W. Todd Doughty
+
+### Project Mentor
+
+* Dr. Sudeep Das (OpenTable)
+
+###References
+Code and inspiration pulled from the following sources:
+*Our mentor, Dr. Sudeep Das, https://github.com/datamusing/herokuFlaskBootstrapDeployed
+*Mr. Miguel Grinberg, http://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world
+*Mr. Miguel Molina, url='http://www.runnable.com/'
+
+###Instructions
+
+*Click on the 4 Links at the top to navigate around
+
+*Click on "Show_Test_Data"
+**This shows 1 of 200 images (selected randomly) from our Test Data Set. Both "HOG" and "Blob" classifiers were trained on the same 300 image Training Data Set.
+**You select what you see in the image, hit the "analyze" button, and the HOG/Blob results are output.
+**To keep doing this for new images, hit the "yes" button at bottom
+
+*Click on "Upload_Local_Image"
+**Upload an image from you computer, select what you see in the image, hit "analyze" button
+**WAIT for ~ 10-20 sec, it runs the trained HOG and Blob classifiers on your image so takes a bit, then HOG and Blob results output, and additional info for how each classifier works
+
+###Next Steps
+*Add text describing the project, how the classifiers work, about us, links to github, etc.
+*Think of how turn into game. Maybe show histogram "live" of how many correct HOG classifier gets correct versus Blob classifier versus User
+*CSS files to make it look awesome
+
+
+
+
