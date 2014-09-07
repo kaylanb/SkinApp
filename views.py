@@ -23,24 +23,24 @@ import pickle
 app = Flask(__name__)
 app.config.from_object('config')
 
-class Click2Play(Form):
-    type=TextField('Anything', validators = [Required()])
-    play= SubmitField("Click2Play")
-
-class getWhatUserSees(Form):
-    UserSees = TextField('UserSees', validators = [Required()])
-    test= TextAreaField("test",validators= [Optional()])
-    MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
-   
+# class Click2Play(Form):
+#     type=TextField('Anything', validators = [Required()])
+#     play= SubmitField("Click2Play")
+# 
+# class getWhatUserSees(Form):
+#     UserSees = TextField('UserSees', validators = [Required()])
+#     test= TextAreaField("test",validators= [Optional()])
+#     MlOnImage= SubmitField("MachineLearnOnImage",validators = [Required()])
+#    
 class SelectOption(Form):
     choices= [("1","Use Test Image"),('2','Upload my own image')]
     HowAnalyze= SelectField("HowAnalyze",choices=choices)
     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
     WhichMethods= SelectMultipleField("Which Methods",choices=choices)
-
-class UploadAnalyze(Form):
-    choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
-    HowAnalyze= SelectField("HowAnalyze",choices=choices)
+# 
+# class UploadAnalyze(Form):
+#     choices= [('1','Blob'),('2','HOG'),('3','Blob features'),('4','HOG features')]
+#     HowAnalyze= SelectField("HowAnalyze",choices=choices)
 
 # def do_ML():
 #     import  machine_learn as ml
@@ -62,44 +62,71 @@ class UploadAnalyze(Form):
 def index():
 #     form= Click2Play()
     form= SelectOption()
-    if form.validate_on_submit():
-        flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
-        return redirect('/AnalyzeImg')
+    # if form.validate_on_submit():
+#         flash('Login requested for OpenID="' + form.openid.data + '", remember_me=' + str(form.remember_me.data))
+#         return redirect('/AnalyzeImg')
     return render_template('index.html',title = 'Select Option',form=form)
 
-@app.route('/AnalyzeImg', methods = ['GET', 'POST'])
-def AnalyzeImg():
-    form= getWhatUserSees()
-    path="training_image_urls/"
-    urlFile= "NewTraining_Food_everyones.txt"
-    urls = np.loadtxt(path+ urlFile, dtype="str")
-    if form.validate_on_submit():
-        flash("HERE I AM")
-        flash('User Sees: %s, test= %s' % \
-            (form.UserSees.data))
-        return redirect('/ML')#,img_url=urls[0])
-    return render_template('AnalyzeImg.html',
-        title = 'AnalyzeImg',urls=urls,form=form)
+# @app.route('/AnalyzeImg', methods = ['GET', 'POST'])
+# def AnalyzeImg():
+#     form= getWhatUserSees()
+#     path="training_image_urls/"
+#     urlFile= "NewTraining_Food_everyones.txt"
+#     urls = np.loadtxt(path+ urlFile, dtype="str")
+#     if form.validate_on_submit():
+#         flash("HERE I AM")
+#         flash('User Sees: %s, test= %s' % \
+#             (form.UserSees.data))
+#         return redirect('/ML')#,img_url=urls[0])
+#     return render_template('AnalyzeImg.html',
+#         title = 'AnalyzeImg',urls=urls,form=form)
+
+@app.route('/ShowTestData', methods = ['GET', 'POST'])
+def ShowTestData():
+    #get urls of test images, and urls that hog and blob predict have in common
+    root="machine_learn/blob_hog_predict_common_url_set/"
+    f_hog=root+"NoLims_shuffled_hog_predict.pickle"
+    f_blob=root+"NoLims_shuffled_blob_predict.pickle"
+    fin=open(f_hog,"r")
+    hog_df= pickle.load(fin)
+    fin.close()
+    fin=open(f_blob,"r")
+    blob_df= pickle.load(fin)
+    fin.close()
+    a=set(blob_df.url.values.flatten())
+    b=set(hog_df.url.values.flatten())
+    c=a.intersection(b)
+    common_urls=np.array(list(c))
+    ####
+    # if form.validate_on_submit():
+#         flash("HERE I AM")
+#         flash('User Sees: %s, test= %s' % \
+#             (form.UserSees.data))
+#         return redirect('/ML')#,img_url=urls[0])
+    url=common_urls[0]
+    return render_template('show_test_data.html',\
+                    url=url)
+
 
 # @app.route('/OutputResults', methods = ['GET', 'POST'])
 # def OutputResults():
 #     do_ML()
 
 
-@app.route('/ML', methods = ['GET', 'POST'])#img_url=image_url)
-def ML():
-    f=open("tmp/blob.txt","r")
-    blob_txt= f.read()
-    f.close()
-    f=open("tmp/hog.txt","r")
-    hog_txt= f.read()
-    f.close()
-#     urls=request.args.get('urls')
-#     flash(urls[0] )
-    #fig out how pass: UserSaw=form.UserSees.data and image_url into this function!\
-    return render_template('ML.html',title = 'ML Results', \
-            blob_image_results="tmp/blob.png",blob_text_results=blob_txt, \
-            hog_image_results="tmp/hog.png",hog_text_results=hog_txt)
+# @app.route('/ML', methods = ['GET', 'POST'])#img_url=image_url)
+# def ML():
+#     f=open("tmp/blob.txt","r")
+#     blob_txt= f.read()
+#     f.close()
+#     f=open("tmp/hog.txt","r")
+#     hog_txt= f.read()
+#     f.close()
+# #     urls=request.args.get('urls')
+# #     flash(urls[0] )
+#     #fig out how pass: UserSaw=form.UserSees.data and image_url into this function!\
+#     return render_template('ML.html',title = 'ML Results', \
+#             blob_image_results="tmp/blob.png",blob_text_results=blob_txt, \
+#             hog_image_results="tmp/hog.png",hog_text_results=hog_txt)
 
 #################### upload file code
 # This is the path to the upload directory
@@ -146,33 +173,12 @@ def get_image_url(filename):
 #     return send_from_directory(app.config['UPLOAD_FOLDER'],
 #                                "engage_1ps.jpg")
 
-class HowAnalyze(Form):
-    choices= [("1","Blob"),('2','HOG'),('3',"Blob and HOG")]
-    func= SelectMultipleField("HowAnalyze",choices=choices)
-    choices= [('1','basic'),('2','detailed')]
-    output= SelectField("what output",choices=choices)
+# class HowAnalyze(Form):
+#     choices= [("1","Blob"),('2','HOG'),('3',"Blob and HOG")]
+#     func= SelectMultipleField("HowAnalyze",choices=choices)
+#     choices= [('1','basic'),('2','detailed')]
+#     output= SelectField("what output",choices=choices)
 
-#flask wtforms to show uploaded image and html for for user select how analyze image
-# @app.route('/upload/analyze')
-# @app.route('/upload/analyze/<filename>')
-# def upload_analyze(filename):
-#     form= HowAnalyze()
-#     if form.validate_on_submit():
-#         # flash('User Sees: %s, test= %s' % \
-# #             (form.UserSees.data))
-#         return redirect( url_for('get_image_url',filename) )
-#     return render_template('upload.html',filename=filename,form=form)
-# 
-#        <form action="" method="post" name="temp">
-#             {{form.hidden_tag()}}
-#             <p><label for="title">{{form.func.label}}</label><br/>
-#                 {{form.func}}
-#             </p>
-#             <p><label for="title">{{form.output.label}}</label><br/>
-#                 {{form.output}}
-#             </p>
-#             <p><input type="submit" name='Analyze' value="Analyze"></p>
-#         </form>
 
 #pure html to show uploaded image and html for for user select how analyze image
 @app.route('/upload/analyze',methods=['GET','POST'])

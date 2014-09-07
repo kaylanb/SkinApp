@@ -1,29 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"
-          rel="stylesheet">
-  </head>
   <body>
-    <div class="container">
-      <div class="header">
-        <h3 class="text-muted">How To Upload a File</h3>
-      </div>
-      <hr/>
-      <div>
-      
-      <form action="upload_process" method="post" enctype="multipart/form-data">
-        <input type="file" name="file"><br /><br />
-        <input type="submit" value="Upload">
-      </form>
-      </div>
-    </div>
+<!--     <input type="submit" value="submit"> -->
+    {% if url %} 
+        <h1>Here is a random image from our Food/Faces Test data set {{filename}}</h1>
+        <img src={{url}} width="200" height="200">
 
-    {% if filename %} 
-        <h1>Uploaded: {{filename}}</h1>
-        <img src={{url_for('get_image_url',filename=filename)}} width="200" height="200">
-
-        <form id="upload_analyze_CalcStuff" action="/upload/analyze_CalcStuff" method="post">
+        <!-- 
+<form id="upload_analyze_CalcStuff" action="/upload/analyze_CalcStuff" method="post">
             <p><input name="filename" value={{filename}}>
             <p>How do you want to analyze the image?</p>
                 <p><input type="radio" name="HowAnalyze" value="Blob"> Blob</p>
@@ -34,6 +18,7 @@
                 <p><input type="radio" name="PrintWhat" value="detailed">ML stats and feature plots</p>
             <input type="submit" value="Analyze!">
         </form>
+ -->
     {% endif %}
   </body>
 </html>
