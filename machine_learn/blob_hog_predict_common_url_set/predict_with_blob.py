@@ -7,6 +7,7 @@ from pandas import read_csv, DataFrame, concat
 from pickle import dump
 
 from sklearn.ensemble import RandomForestClassifier
+from pickle import load,dump
 
 
 def totp(ans):
@@ -41,12 +42,12 @@ def fraction_correct(predict,ans):
     return (tp+tn)/len(ans)
 
 
-def train_and_predict(features_df):
-    TrainX= features_df.ix[0:300,2:].values
-    TrainY=features_df.ix[0:300,0].values
-    TestX= features_df.ix[300:,2:].values
-    TestY= features_df.ix[300:,0].values
-    TestUrls= features_df.ix[300:,1].values
+def train_and_predict(feat_df,url_df,predict_save_name,stats_save_name):
+    TrainX= feat_df.values[0:300,:]
+    TrainY=url_df.answer.values[0:300]
+    TestX= feat_df.values[300:,:]
+    TestY= url_df.answer.values[300:]
+    TestUrls= url_df.URL.values[300:]
 
     RF = RandomForestClassifier(n_estimators=100, max_depth=None,
                                          min_samples_split=2, random_state=0,
@@ -59,11 +60,11 @@ def train_and_predict(features_df):
     results_df["url"]=TestUrls
     results_df["answer"]=TestY
     results_df["predict"]=predict
-    fout = open("blob_predict_NAME.pickle", 'w') 
+    fout = open(predict_save_name, 'w') 
     dump(results_df, fout)
     fout.close()
     #save stats of run to file
-    (prec,tp_norm,fp_norm)= precision(predict,TestY):
+    (prec,tp_norm,fp_norm)= precision(predict,TestY)
     (rec,tp_norm,fn_norm)= recall(predict,TestY)
     stats={}
     stats["prec"]= prec
@@ -71,11 +72,20 @@ def train_and_predict(features_df):
     stats["fp_norm"]= fp_norm
     stats["fn_norm"]= fn_norm
     stats["frac_corr"]= fraction_correct(predict,TestY)
-    fout = open("blob_predict_stats_NAME.pickle", 'w') 
+    fout = open(stats_save_name, 'w') 
     dump(stats, fout)
     fout.close()
 
+fin=open('NoLims_shuffled_blob_features.pickle',"r")
+feat_df= load(fin)
+fin.close()
+fin=open('NoLims_shuffled_url_answer.pickle',"r")
+url_df= load(fin)
+fin.close()
 
+predict_save_name="NoLims_shuffled_blob_predict.pickle"
+stats_save_name="NoLims_shuffled_blob_stats.pickle"
+train_and_predict(feat_df,url_df,predict_save_name,stats_save_name)
 
 
 

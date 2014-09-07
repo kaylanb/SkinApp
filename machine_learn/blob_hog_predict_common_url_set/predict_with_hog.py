@@ -52,11 +52,29 @@ def update_dataframes_with_urls_exist():
     pickle.dump(blob_feat_df_exist, fout)
     fout.close()
 
-def hog_features(urls,output_csv_name):
-    feat = zeros((len(urls), 900))
+def hog_features(ans_url_df,output_pickle_name):
+    urls=ans_url_df.URL.values
+    answers=ans_url_df.answer.values
+    
+    urls_exist=[]
+    ans_exist=[]
+    cnt=-1
+    for url,ans in zip(urls,answers):
+        cnt+=1
+        print "cnt= %d , checking urls" % cnt
+        try:
+            read= urllib2.urlopen(url).read()
+            urls_exist.append(url)
+            ans_exist.append(ans)
+        except urllib2.URLError:
+            continue
+
+    urls_exist= array(urls_exist)
+    ans_exist= array(ans_exist)
+    feat = zeros((len(urls_exist), 900))
     count=0
-    for url in urls:
-        print "count= %d" % count
+    for url in urls_exist:
+        print "count= %d -- calc features" % count
         read= urllib2.urlopen(url).read()
         obj = Image.open( cStringIO.StringIO(read) )
         img = array(obj.convert('L'))
@@ -66,48 +84,48 @@ def hog_features(urls,output_csv_name):
             feat[count] = blocks
         count += 1
 
+    urls_exist_df= DataFrame(urls_exist,columns=["URL"])
+    ans_exist_df= DataFrame(ans_exist,columns=["answer"])
     feat_df= DataFrame(feat)
-    final_df.to_csv(output_csv_name)
-    return 
+    final_df= pd_concat([urls_exist_df,ans_exist_df,feat_df],axis=1)
+    fout = open(output_pickle_name, 'w') 
+    pickle.dump(final_df.dropna(), fout)
+    fout.close()
 
-update_lists_with_urls_exist()
+def train_and_predict(feat_df,predict_save_name):
+    TrainX= feat_df.values[0:300,2:]
+    TrainY= feat_df.answer.values[0:300]
+    TestX= feat_df.values[300:,2:]
+    TestY=feat_df.answer.values[300:]
+    TestUrls= feat_df.URL.values[300:]
+
+    ET_classifier = ExtraTreesClassifier(n_estimators=50, max_depth=None, min_samples_split=1, random_state=0)
+    ET_classifier.fit(TrainX,TrainY)
+    ET_prediction = ET_classifier.predict(TestX) 
+
+    LinSVC_classifier = svm.LinearSVC()
+    LinSVC_classifier.fit(TrainX,TrainY)
+    LinSVC_predict = LinSVC_classifier.predict(TestX)
+
+    a=DataFrame()
+    a["url"]=TestUrls
+    a["answer"]=TestY
+    a["ET_predict"]=ET_prediction
+    a["LinSVC_predict"]=LinSVC_predict
+    fout = open(predict_save_name, 'w') 
+    pickle.dump(a, fout)
+    fout.close()
+
+###hog features
 # fin=open('FacesAndLimbs_shuffled_url_answer.pickle',"r")
-# df= pickle.load(fin)
+# ans_url_df= pickle.load(fin)
 # fin.close()
-# urls=df.URL.values
-# hog_features(urls, "FacesAndLimbs_Food_hog_features.csv")
+# hog_features(ans_url_df, "FacesAndLimbs_shuffled_hog_features.pickle")
 
-# def predict_TestData(Food_df,People_df):
-#     cTrainF = rand(len(Food_df)) > .5
-#     cTestF = ~cTrainF
-#     cTrainP = rand(len(People_df)) > .5
-#     cTestP = ~cTrainP
-# 
-#     TrainX_df = pd_concat([People_df[cTrainP], Food_df[cTrainF]],axis=0)
-#     TestX_df = pd_concat([People_df[cTestP], Food_df[cTestF]],axis=0)
-# 
-#     TrainX= TrainX_df.ix[:,2:].values
-#     TestX= TestX_df.ix[:,2:].values
-#     TrainY = concatenate([ones(len(People_df[cTrainP])), zeros(len(Food_df[cTrainF]))])
-#     TestY = concatenate([ones(len(People_df[cTestP])), zeros(len(Food_df[cTestF]))])
-# 
-#     ET_classifier = ExtraTreesClassifier(n_estimators=50, max_depth=None, min_samples_split=1, random_state=0)
-#     ET_classifier.fit(TrainX,TrainY)
-#     ET_prediction = ET_classifier.predict(TestX) 
-# 
-#     LinSVC_classifier = svm.LinearSVC()
-#     LinSVC_classifier.fit(TrainX,TrainY)
-#     LinSVC_predict = LinSVC_classifier.predict(TestX)
-# 
-#     a=DataFrame()
-#     a["url"]=TestX_df.urls.values
-#     a["answer"]=TestY
-#     a["ET_predict"]=ET_prediction
-#     a["LinSVC_predict"]=LinSVC_predict
-#     a.to_csv("prediction_for_TestData.csv")
-# 
-# Food_df = read_csv('FacesAndLimbs_Food_hog_features.csv')
-# People_df = read_csv('FacesAndLimbs_People_hog_features.csv')
-# predict_TestData(Food_df,People_df)
+###hog predict
+fin=open('NoLims_shuffled_hog_features.pickle',"r")
+feat_df= pickle.load(fin)
+fin.close()
+train_and_predict(feat_df,"NoLims_shuffled_hog_predict.pickle")
 
 
