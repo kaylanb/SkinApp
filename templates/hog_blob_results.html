@@ -1,6 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-    <body>
+{% extends "base.html" %}
+{% block content %}
+<!-- extend base layout -->
+
 <!--         HOG Results -->
         {% if hog_fig and hog_predict and hog_stats %} 
             <h1>HOG image analysis:</h1>
@@ -33,5 +34,6 @@
                 False Pos. (normalized): {{blob_stats.fp_norm}}
             </p>
         {% endif %}
-    </body>
-</html>
+
+<!-- extend base layout -->
+{% endblock %}

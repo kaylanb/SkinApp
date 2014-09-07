@@ -81,6 +81,21 @@ def AboutUs():
 #     return render_template('AnalyzeImg.html',
 #         title = 'AnalyzeImg',urls=urls,form=form)
 
+#save stuff to tmp/ directory as .pickle file so can be loaded as necessary later
+def save_to_tmp(obj,save_name):
+    path='tmp/'+save_name
+    fout = open(path, 'w') 
+    pickle.dump(obj, fout)
+    fout.close()
+
+#load stuff from tmp/ directory that saved there previously
+def load_from_tmp(f_name):
+    path='tmp/'+f_name  
+    fin=open(path,"r")
+    obj=pickle.load(fin)
+    fin.close()
+    return obj
+
 @app.route('/ShowTestData', methods = ['GET', 'POST'])
 def ShowTestData():
     #get urls of test images, and urls that hog and blob predict have in common
@@ -97,16 +112,12 @@ def ShowTestData():
     b=set(hog_df.url.values.flatten())
     c=a.intersection(b)
     common_urls=np.array(list(c))
-    ####
-    rand_index= randrange(len(common_urls))
-    print "Above url set!? rand_index= %d" % rand_index
-    url=common_urls[ rand_index ]
     if request.method == 'POST':  
         #if here then user clicked output blob hog for image
         if request.method == 'POST' and request.form["submit"]=="yes":  
             #if here then user clicked do again for new image
             return redirect('/ShowTestData') #url_for('upload_analyze'))
-            
+        url=load_from_tmp("url.pickle") #have to save+load this b/c random index
         #hog, blob prediction for url
         ans_pred_d= {} 
         index= np.where(blob_df.url == url)[0][0]
@@ -126,8 +137,14 @@ def ShowTestData():
         return render_template('show_user_test_data_blob_hog.html',\
                     url=url,WhatSee=request.form["WhatSee"],ans_pred_d=ans_pred_d,\
                     blob_stats=blob_stats,hog_stats=hog_stats)
+    #AFTER if request.method so don't get new rand_index
+    rand_index= randrange(len(common_urls))
+    print "Above url set!? rand_index= %d" % rand_index
+    url=common_urls[ rand_index ]
+    save_to_tmp(url,"url.pickle")#save to tmp so can load it from inside ''if request.method=='POST' ''
     return render_template('show_user_test_data.html',\
                     url=url)
+
 
 
 # @app.route('/OutputResults', methods = ['GET', 'POST'])
