@@ -1,17 +1,17 @@
---no-index -f https://pypi.python.org/packages/source/F/Flask/ Flask==0.9  
---no-index -f https://pypi.python.org/pypi/Jinja2/ Jinja2==2.7.3
---no-index -f https://pypi.python.org/pypi/MarkupSafe MarkupSafe==0.23
---no-index -f http://dist.plone.org/thirdparty/ -U PIL==1.1.7
---no-index -f https://pypi.python.org/pypi/Werkzeug/0.8.3 Werkzeug==0.8.3
---no-index -f https://pypi.python.org/pypi/matplotlib/ matplotlib==1.3.1
---no-index -f https://pypi.python.org/pypi/nose nose==1.3.4
---no-index -f https://pypi.python.org/pypi/numpy numpy==1.8.2
---no-index -f https://pypi.python.org/pypi/pandas pandas==0.14.1
---no-index -f https://pypi.python.org/pypi/pyparsing pyparsing==2.0.1
---no-index -f https://pypi.python.org/pypi/python-dateutil python-dateutil==1.5
---no-index -f https://pypi.python.org/pypi/pytz pytz==2014.7
---no-index -f https://pypi.python.org/pypi/scikit-image scikit-image==0.10.1
---no-index -f https://pypi.python.org/pypi/scikit-learn scikit-learn==0.15.1
---no-index -f https://pypi.python.org/pypi/scipy scipy==0.14.0
---no-index -f https://pypi.python.org/pypi/six six==1.7.3
---no-index -f https://pypi.python.org/pypi/wsgiref wsgiref==0.1.2
+https://pypi.python.org/packages/source/F/Flask/Flask-0.9.tar.gz 
+https://pypi.python.org/pypi/Jinja2/Jinja2-2.7.3.tar.gz
+https://pypi.python.org/pypi/MarkupSafe/MarkupSafe-0.23.tar.gz
+http://dist.repoze.org/PIL-1.1.6.tar.gz
+https://pypi.python.org/pypi/Werkzeug/Werkzeug-0.8.3.tar.gz
+https://pypi.python.org/pypi/matplotlib/matplotlib-1.3.1.tar.gz
+https://pypi.python.org/pypi/nose/nose-1.3.4.tar.gz
+https://pypi.python.org/pypi/numpy/numpy-1.8.2.tar.gz
+https://pypi.python.org/pypi/pandas/pandas-0.14.1.tar.gz
+https://pypi.python.org/pypi/pyparsing/pyparsing-2.0.1.tar.gz
+https://pypi.python.org/pypi/python-dateutil/python-dateutil-1.5.tar.gz
+https://pypi.python.org/pypi/pytz/pytz-2014.7.tar.gz
+https://pypi.python.org/pypi/scikit-image/scikit-image-0.10.1.tar.gz
+https://pypi.python.org/pypi/scikit-learn/scikit-learn-0.15.1.tar.gz
+https://pypi.python.org/pypi/scipy/scipy-0.14.0.tar.gz
+https://pypi.python.org/pypi/six/six-1.7.3.tar.gz
+https://pypi.python.org/pypi/wsgiref/wsgiref-0.1.2.tar.gz
