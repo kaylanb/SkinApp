@@ -1,5 +1,5 @@
 https://pypi.python.org/packages/source/F/Flask/Flask-0.9.tar.gz 
-https://pypi.python.org/pypi/Jinja2/Jinja2-2.7.3.tar.gz
+install_packages/Jinja2-2.7.3.tar.gz
 https://pypi.python.org/pypi/MarkupSafe/MarkupSafe-0.23.tar.gz
 http://dist.repoze.org/PIL-1.1.6.tar.gz
 https://pypi.python.org/pypi/Werkzeug/Werkzeug-0.8.3.tar.gz
