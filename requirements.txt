@@ -1,6 +1,6 @@
 setuptools
-six
-numpy
-scipy
-scikit-image
-scikit-learn
+install_packages/six-1.7.3.tar.gz
+install_packages/numpy-1.9.0.tar.gz
+install_packages/scipy-0.14.0.tar.gz
+install_packages/scikit-image-0.10.1.tar.gz
+install_packages/scikit-learn-0.15.1.tar.gz
