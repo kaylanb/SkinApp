@@ -1,5 +1,5 @@
-six
-install_packages/numpy-1.9.0.tar.gz
-install_packages/scipy-0.14.0.tar.gz
-install_packages/scikit-image-0.10.1.tar.gz
-install_packages/scikit-learn-0.15.1.tar.gz
+./install_packages_all/six-1.7.3.tar.gz
+./install_packages_all/numpy-1.9.0.tar.gz
+./install_packages_all/scipy-0.14.0.tar.gz
+./install_packages_all/scikit-image-0.10.1.tar.gz
+./install_packages_all/scikit-learn-0.15.1.tar.gz
