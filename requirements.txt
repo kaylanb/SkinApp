@@ -1,5 +1,4 @@
-setuptools
-install_packages/six-1.7.3.tar.gz
+six
 install_packages/numpy-1.9.0.tar.gz
 install_packages/scipy-0.14.0.tar.gz
 install_packages/scikit-image-0.10.1.tar.gz
