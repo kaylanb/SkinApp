@@ -19,6 +19,7 @@ from PIL import Image
 import sys
 import pickle
 from random import randrange
+import os
 
 
 app = Flask(__name__)
@@ -27,11 +28,23 @@ app.config.from_object('config')
 @app.route('/', methods=['GET','POST'])
 # @app.route('/index', methods = ['GET', 'POST'])
 def index():
-    return render_template('index.html')
+    return render_template('index_bootstrap.html')#('index.html')
 
-@app.route('/AboutUs')
-def AboutUs():
-    return render_template('AboutUs.html')
+@app.route('/OurTeam')
+def OurTeam():
+    print "I am here:"
+    os.system("pwd")
+    return render_template('our_team.html')
+
+@app.route('/AboutTheProject')
+def AboutProject():
+    print "I am here:"
+    os.system("pwd")
+    return render_template('about_the_project.html')
+
+# @app.route('/BootStrap')
+# def BootStrap():
+#     return render_template('index_bootstrap.html')
 
 
 #save stuff to tmp/ directory as .pickle file so can be loaded as necessary later
