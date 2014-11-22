@@ -3992,6 +3992,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .navbar-nav {
   margin: 7.5px -15px;
 }
+
 .navbar-nav > li > a {
   padding-top: 10px;
   padding-bottom: 10px;
@@ -4257,26 +4258,29 @@ fieldset[disabled] .navbar-default .btn-link:focus {
   color: #ccc;
 }
 .navbar-inverse {
-  background-color: #222;
-  border-color: #080808;
+  background-color: #777;
+  border-color: #00f;
+  border-width: 1px
 }
 .navbar-inverse .navbar-brand {
-  color: #9d9d9d;
+  color: #fff;
+  background-color: #00f;
 }
+/* 
 .navbar-inverse .navbar-brand:hover,
 .navbar-inverse .navbar-brand:focus {
-  color: #fff;
-  background-color: transparent;
+  color: 00f;
 }
+ */
 .navbar-inverse .navbar-text {
   color: #9d9d9d;
 }
 .navbar-inverse .navbar-nav > li > a {
-  color: #9d9d9d;
+  color: #fff;
 }
 .navbar-inverse .navbar-nav > li > a:hover,
 .navbar-inverse .navbar-nav > li > a:focus {
-  color: #fff;
+  color: #00f;
   background-color: transparent;
 }
 .navbar-inverse .navbar-nav > .active > a,
@@ -5902,7 +5906,7 @@ button.close {
   font-size: 20px;
   color: #fff;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, .6);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
   filter: alpha(opacity=50);
   opacity: .5;
 }
@@ -5926,7 +5930,7 @@ button.close {
 }
 .carousel-control:hover,
 .carousel-control:focus {
-  color: #fff;
+  color: #00f;
   text-decoration: none;
   filter: alpha(opacity=90);
   outline: 0;
@@ -5940,6 +5944,7 @@ button.close {
   top: 50%;
   z-index: 5;
   display: inline-block;
+  font-family: 'Glyphicons Halflings';
 }
 .carousel-control .icon-prev,
 .carousel-control .glyphicon-chevron-left {
@@ -5962,8 +5967,9 @@ button.close {
   content: '\2039';
 }
 .carousel-control .icon-next:before {
-  content: '\203a';
+  content: '\2039';
 }
+
 .carousel-indicators {
   position: absolute;
   bottom: 10px;
@@ -5977,21 +5983,21 @@ button.close {
 }
 .carousel-indicators li {
   display: inline-block;
-  width: 10px;
-  height: 10px;
+  width: 18px;
+  height: 18px;
   margin: 1px;
   text-indent: -999px;
   cursor: pointer;
   background-color: #000 \9;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: rgba(0, 0, 255, 0);
   border: 1px solid #fff;
-  border-radius: 10px;
+  border-radius: 20px;
 }
 .carousel-indicators .active {
-  width: 12px;
-  height: 12px;
+  width: 20px;
+  height: 20px;
   margin: 0;
-  background-color: #fff;
+  background-color: #00f;
 }
 .carousel-caption {
   position: absolute;
