@@ -33,7 +33,7 @@ def index():
 @app.route('/OurTeam')
 def OurTeam():
     print "I am here:"
-    os.system("pwd")
+    print os.system("pwd")
     return render_template('our_team.html')
 
 @app.route('/AboutTheProject')
